@@ -11,7 +11,8 @@ use App\Http\Controllers\Staff\{
     StudentController as StaffStudentController,
     RoomController as StaffRoomController,
     BuildingController as StaffBuildingController,
-    RoomHistoryController as StaffRoomHistoryController
+    RoomHistoryController as StaffRoomHistoryController,
+    ReportController as StaffReportController
 };
 use App\Http\Controllers\Staff\Term\BlockController as StaffBlockController;
 use App\Http\Controllers\Staff\Major\CompanyRelationController as StaffCompanyRelationController;
@@ -29,7 +30,9 @@ use App\Http\Controllers\Staff\Major\TemplateController as StaffMajorTemplateCon
 use App\Http\Controllers\Staff\Teacher\ImportController as StaffTeacherImportController;
 use App\Http\Controllers\Staff\Teacher\TemplateController as StaffTeacherTemplateController;
 use App\Http\Controllers\Staff\SubjectController as StaffSubjectController;
-use App\Http\Controllers\Staff\ReportController as StaffReportController;
+use App\Http\Controllers\Staff\TimetableTemplateController as StaffTimetableTemplateController;
+use App\Http\Controllers\Staff\TimetableEntryController as StaffTimetableEntryController;
+use App\Http\Controllers\Staff\StaffController as StaffStaffController;
 
 Route::middleware(['auth', 'role:Staff'])
     ->prefix('staff')
@@ -60,7 +63,7 @@ Route::middleware(['auth', 'role:Staff'])
         Route::put('/majors/{major}', [StaffMajorController::class, 'update'])->name('majors.update');
         Route::delete('/majors/{major}', [StaffMajorController::class, 'destroy'])->name('majors.destroy');
 
-        Route::get('/majors/{major}', [StaffMajorController::class, 'show'])->name('majors.show');
+        Route::get('/majors/{major}', [ StaffMajorController::class, 'show'])->name('majors.show');
         Route::post('/majors/{major}/company-relation', [StaffCompanyRelationController::class, 'store'])->name('majors.company-relation.store');
         Route::put('/majors/{major}/company-relation/{companyRelation}', [StaffCompanyRelationController::class, 'update'])->name('majors.company-relation.update');
         Route::delete('/majors/{major}/company-relation/{companyRelation}', [StaffCompanyRelationController::class, 'destroy'])->name('majors.company-relation.destroy');
@@ -125,8 +128,24 @@ Route::middleware(['auth', 'role:Staff'])
         Route::put('/rooms/{room}', [StaffRoomController::class, 'update'])->name('rooms.update');
         Route::delete('/rooms/{room}', [StaffRoomController::class, 'destroy'])->name('rooms.destroy');
 
-        Route::get('/schedules', [StaffScheduleController::class, 'index'])->name('schedules.index');
-        Route::get('/schedules/major/{majorId}', [StaffScheduleController::class, 'getMajorSchedules'])->name('schedules.major');
+        // Schedules - Main Entry Point
+        Route::get('/schedules', [StaffTimetableEntryController::class, 'index'])->name('schedules.index');
+
+        // Timetable Templates
+        Route::get('/schedules/templates', [StaffTimetableTemplateController::class, 'index'])->name('schedules.templates.index');
+        Route::post('/schedules/templates', [StaffTimetableTemplateController::class, 'store'])->name('schedules.templates.store');
+        Route::post('/schedules/templates/{template}/activate', [StaffTimetableTemplateController::class, 'activate'])->name('schedules.templates.activate');
+        Route::post('/schedules/templates/{template}/deactivate', [StaffTimetableTemplateController::class, 'deactivate'])->name('schedules.templates.deactivate');
+        Route::delete('/schedules/templates/{template}', [StaffTimetableTemplateController::class, 'destroy'])->name('schedules.templates.destroy');
+
+        // Timetable Entries
+        Route::post('/schedules/entries', [StaffTimetableEntryController::class, 'store'])->name('schedules.entries.store');
+        Route::put('/schedules/entries/{entry}', [StaffTimetableEntryController::class, 'update'])->name('schedules.entries.update');
+        Route::delete('/schedules/entries/{entry}', [StaffTimetableEntryController::class, 'destroy'])->name('schedules.entries.destroy');
+
+        // AJAX endpoints for cascading filters
+        Route::get('/schedules/classes', [StaffTimetableEntryController::class, 'getClassesByMajor'])->name('schedules.classes');
+        Route::get('/schedules/templates-by-class', [StaffTimetableEntryController::class, 'getTemplatesByClass'])->name('schedules.templates-by-class');
 
         // Reports
         Route::get('/reports', [StaffReportController::class, 'index'])->name('reports.index');
@@ -134,5 +153,7 @@ Route::middleware(['auth', 'role:Staff'])
         Route::get('/reports/students/export', [StaffReportController::class, 'exportStudents'])->name('reports.students.export');
         Route::get('/reports/teachers', [StaffReportController::class, 'teachers'])->name('reports.teachers');
         Route::get('/reports/teachers/export', [StaffReportController::class, 'exportTeachers'])->name('reports.teachers.export');
+        Route::get('/reports/schedules', [StaffReportController::class, 'schedules'])->name('reports.schedules');
+        Route::get('/reports/rooms', [StaffReportController::class, 'rooms'])->name('reports.rooms');
     });
 

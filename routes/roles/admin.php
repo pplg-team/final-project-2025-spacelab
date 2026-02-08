@@ -1,18 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Staff\{
-    DashboardController as StaffDashboardController,
-    ScheduleController as StaffScheduleController,
-    TermController as StaffTermController,
-    MajorController as StaffMajorController,
-    ClassroomController as StaffClassController,
-    TeacherController as StaffTeacherController,
-    StudentController as StaffStudentController,
-    RoomController as StaffRoomController,
-    BuildingController as StaffBuildingController,
-    RoomHistoryController as StaffRoomHistoryController
-};
 use App\Http\Controllers\Admin\{
     DashboardController as AdminDashboardController,
     ScheduleController as AdminScheduleController,
@@ -44,6 +32,7 @@ use App\Http\Controllers\Admin\Teacher\TemplateController as AdminTeacherTemplat
 use App\Http\Controllers\Admin\SubjectController as AdminSubjectController;
 use App\Http\Controllers\Admin\TimetableTemplateController as AdminTimetableTemplateController;
 use App\Http\Controllers\Admin\TimetableEntryController as AdminTimetableEntryController;
+use App\Http\Controllers\Admin\StaffController as AdminStaffController;
 
 Route::middleware(['auth', 'role:Admin'])
     ->prefix('admin')
@@ -166,5 +155,13 @@ Route::middleware(['auth', 'role:Admin'])
         Route::get('/reports/teachers/export', [AdminReportController::class, 'exportTeachers'])->name('reports.teachers.export');
         Route::get('/reports/schedules', [AdminReportController::class, 'schedules'])->name('reports.schedules');
         Route::get('/reports/rooms', [AdminReportController::class, 'rooms'])->name('reports.rooms');
+
+        // Staff Management
+        Route::get('/staff', [AdminStaffController::class, 'index'])->name('staff.index');
+        Route::post('/staff', [AdminStaffController::class, 'store'])->name('staff.store');
+        Route::get('/staff/{id}', [AdminStaffController::class, 'show'])->name('staff.show');
+        Route::put('/staff/{id}', [AdminStaffController::class, 'update'])->name('staff.update');
+        Route::delete('/staff/{id}', [AdminStaffController::class, 'destroy'])->name('staff.destroy');
+        Route::post('/staff/{id}/reset-password', [AdminStaffController::class, 'resetPassword'])->name('staff.reset-password');
     });
 

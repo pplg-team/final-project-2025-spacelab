@@ -13,6 +13,7 @@ export default defineConfig({
                 'resources/js/staff/room-index.js',
                 'resources/css/home-animations.css',
                 'resources/js/home-interactions.js',
+                'resources/js/staff/staff-index.js',
             ],
             refresh: true,
         }),
