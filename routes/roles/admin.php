@@ -41,6 +41,8 @@ use App\Http\Controllers\Admin\Major\TemplateController as AdminMajorTemplateCon
 use App\Http\Controllers\Admin\Teacher\ImportController as AdminTeacherImportController;
 use App\Http\Controllers\Admin\Teacher\TemplateController as AdminTeacherTemplateController;
 use App\Http\Controllers\Admin\SubjectController as AdminSubjectController;
+use App\Http\Controllers\Admin\TimetableTemplateController as AdminTimetableTemplateController;
+use App\Http\Controllers\Admin\TimetableEntryController as AdminTimetableEntryController;
 
 Route::middleware(['auth', 'role:Admin'])
     ->prefix('admin')
@@ -136,7 +138,23 @@ Route::middleware(['auth', 'role:Admin'])
         Route::put('/rooms/{room}', [AdminRoomController::class, 'update'])->name('rooms.update');
         Route::delete('/rooms/{room}', [AdminRoomController::class, 'destroy'])->name('rooms.destroy');
 
-        Route::get('/schedules', [AdminScheduleController::class, 'index'])->name('schedules.index');
-        Route::get('/schedules/major/{majorId}', [AdminScheduleController::class, 'getMajorSchedules'])->name('schedules.major');
+        // Schedules - Main Entry Point
+        Route::get('/schedules', [AdminTimetableEntryController::class, 'index'])->name('schedules.index');
+
+        // Timetable Templates
+        Route::get('/schedules/templates', [AdminTimetableTemplateController::class, 'index'])->name('schedules.templates.index');
+        Route::post('/schedules/templates', [AdminTimetableTemplateController::class, 'store'])->name('schedules.templates.store');
+        Route::post('/schedules/templates/{template}/activate', [AdminTimetableTemplateController::class, 'activate'])->name('schedules.templates.activate');
+        Route::post('/schedules/templates/{template}/deactivate', [AdminTimetableTemplateController::class, 'deactivate'])->name('schedules.templates.deactivate');
+        Route::delete('/schedules/templates/{template}', [AdminTimetableTemplateController::class, 'destroy'])->name('schedules.templates.destroy');
+
+        // Timetable Entries
+        Route::post('/schedules/entries', [AdminTimetableEntryController::class, 'store'])->name('schedules.entries.store');
+        Route::put('/schedules/entries/{entry}', [AdminTimetableEntryController::class, 'update'])->name('schedules.entries.update');
+        Route::delete('/schedules/entries/{entry}', [AdminTimetableEntryController::class, 'destroy'])->name('schedules.entries.destroy');
+
+        // AJAX endpoints for cascading filters
+        Route::get('/schedules/classes', [AdminTimetableEntryController::class, 'getClassesByMajor'])->name('schedules.classes');
+        Route::get('/schedules/templates-by-class', [AdminTimetableEntryController::class, 'getTemplatesByClass'])->name('schedules.templates-by-class');
     });
 

@@ -2,357 +2,478 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('Jadwal Pelajaran') }}
+                {{ __('Kelola Jadwal Pelajaran') }}
             </h2>
+            <div class="flex items-center gap-2">
+                <a href="{{ route('admin.schedules.templates.index') }}"
+                    class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                    <x-heroicon-o-document-duplicate class="w-4 h-4 mr-2" />
+                    Kelola Template
+                </a>
+            </div>
         </div>
     </x-slot>
 
-    <div class="py-6" x-data="{
-        activeTab: '{{ $majors->first()->id ?? '' }}',
-        search: '',
-        searchDebounce: null,
-        filteredSearch: '',
-        viewMode: 'table',
-        expandedClass: null,
-        majors: {{ $majors->map(fn($m) => ['id' => $m->id, 'name' => $m->name, 'logo' => $m->logo, 'count' => $m->classes_count])->toJson() }},
-        loadedMajors: {},
-        loadingMajor: null,
-        dayNames: ['', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
-        dayColors: {
-            1: { bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-300 dark:border-blue-700', text: 'text-blue-700 dark:text-blue-300', badge: 'bg-blue-500' },
-            2: { bg: 'bg-emerald-50 dark:bg-emerald-900/20', border: 'border-emerald-300 dark:border-emerald-700', text: 'text-emerald-700 dark:text-emerald-300', badge: 'bg-emerald-500' },
-            3: { bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-300 dark:border-amber-700', text: 'text-amber-700 dark:text-amber-300', badge: 'bg-amber-500' },
-            4: { bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border-purple-300 dark:border-purple-700', text: 'text-purple-700 dark:text-purple-300', badge: 'bg-purple-500' },
-            5: { bg: 'bg-rose-50 dark:bg-rose-900/20', border: 'border-rose-300 dark:border-rose-700', text: 'text-rose-700 dark:text-rose-300', badge: 'bg-rose-500' },
-            6: { bg: 'bg-cyan-50 dark:bg-cyan-900/20', border: 'border-cyan-300 dark:border-cyan-700', text: 'text-cyan-700 dark:text-cyan-300', badge: 'bg-cyan-500' }
-        },
-        async loadMajorSchedules(majorId) {
-            if (this.loadedMajors[majorId]) return;
-            this.loadingMajor = majorId;
-            try {
-                const response = await fetch(`/staff/schedules/major/${majorId}`);
-                const data = await response.json();
-                if (data.success) {
-                    this.loadedMajors[majorId] = data.classes;
-                }
-            } catch (error) {
-                console.error('Error loading schedules:', error);
-            } finally {
-                this.loadingMajor = null;
-            }
-        },
-        init() {
-            this.$watch('activeTab', (newTab) => {
-                if (newTab) this.loadMajorSchedules(newTab);
-            });
-            this.$watch('search', (value) => {
-                clearTimeout(this.searchDebounce);
-                this.searchDebounce = setTimeout(() => {
-                    this.filteredSearch = value;
-                }, 300);
-            });
-            if (this.activeTab) this.loadMajorSchedules(this.activeTab);
-        },
-        getScheduleCount(classItem) {
-            if (!classItem.schedule_days) return 0;
-            return Object.values(classItem.schedule_days).flat().filter(i => !i.is_break).length;
-        }
-    }">
-        <div class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Sticky Top Bar -->
-            <div
-                class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm mb-6 sticky top-0 z-[5] border border-gray-200/80 dark:border-slate-700/80">
-                <!-- Search & View Toggle -->
-                <div class="p-4 border-b border-gray-100 dark:border-slate-700/50">
-                    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-                        <div class="flex-1 max-w-sm w-full">
-                            <div class="relative">
-                                <input type="text" x-model="search" placeholder="Cari kelas..."
-                                    class="w-full text-sm border border-gray-200 dark:border-slate-600 dark:bg-slate-900/50 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 rounded-xl pl-10 pr-4 py-2.5 transition-all">
-                                <x-heroicon-o-magnifying-glass
-                                    class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                            </div>
-                        </div>
+    <div class="py-2 flex items-center justify-end ml-4">
+        <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                {{ $activeTerm
+                    ? 'Semester ' . ucfirst($activeTerm->kind) . ' Tahun Ajaran ' . $activeTerm->tahun_ajaran
+                    : 'Tahun Ajaran Tidak Diketahui' }}
+            </p>
+        </div>
+    </div>
 
-                        <div class="flex items-center gap-1.5 bg-gray-100 dark:bg-slate-700/50 rounded-xl p-1">
-                            <button @click="viewMode = 'table'"
-                                :class="viewMode === 'table' ? 'bg-white dark:bg-slate-600 shadow-sm' :
-                                    'hover:bg-white/50 dark:hover:bg-slate-600/50'"
-                                class="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-300 transition-all flex items-center gap-1.5">
-                                <x-heroicon-o-table-cells class="w-4 h-4" />
-                                <span>Tabel</span>
-                            </button>
-                            <button @click="viewMode = 'compact'"
-                                :class="viewMode === 'compact' ? 'bg-white dark:bg-slate-600 shadow-sm' :
-                                    'hover:bg-white/50 dark:hover:bg-slate-600/50'"
-                                class="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-300 transition-all flex items-center gap-1.5">
-                                <x-heroicon-o-squares-2x2 class="w-4 h-4" />
-                                <span>Kartu</span>
-                            </button>
+    <div class="py-6">
+        <div class="space-y-6">
+            <!-- Alert Messages -->
+            @if (session('success'))
+                <div
+                    class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <x-heroicon-o-check-circle
+                            class="w-5 h-5 text-green-600 dark:text-green-400 mr-3 flex-shrink-0" />
+                        <p class="text-sm font-medium text-green-800 dark:text-green-200">{{ session('success') }}</p>
+                    </div>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <x-heroicon-o-x-circle class="w-5 h-5 text-red-600 dark:text-red-400 mr-3 flex-shrink-0" />
+                        <p class="text-sm font-medium text-red-800 dark:text-red-200">{{ session('error') }}</p>
+                    </div>
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <x-heroicon-o-exclamation-triangle
+                            class="w-5 h-5 text-red-600 dark:text-red-400 mr-3 mt-0.5 flex-shrink-0" />
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-red-800 dark:text-red-200 mb-2">Terdapat kesalahan:</p>
+                            <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300 space-y-1">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
                         </div>
                     </div>
                 </div>
+            @endif
 
-                <!-- Major Tabs -->
-                <div class="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-slate-600">
-                    <div class="flex gap-1 px-4 py-3 min-w-max">
-                        @foreach ($majors as $major)
-                            <button @click="activeTab = '{{ $major->id }}'"
-                                :class="activeTab === '{{ $major->id }}'
-                                    ?
-                                    'bg-blue-600 dark:bg-blue-500 text-white' :
-                                    'bg-gray-50 dark:bg-slate-700/50 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'"
-                                class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl transition-all whitespace-nowrap">
-                                @if ($major->logo)
-                                    <img src="{{ $major->logo }}" alt="{{ $major->name }}"
-                                        class="w-5 h-5 rounded object-cover flex-shrink-0">
-                                @endif
-                                <span>{{ $major->name }}</span>
-                                <span class="text-xs font-semibold px-1.5 py-0.5 rounded-md"
-                                    :class="activeTab === '{{ $major->id }}' ? 'bg-white/20' :
-                                        'bg-gray-200 dark:bg-slate-600'"
-                                    x-text="majors.find(m => m.id === '{{ $major->id }}')?.count || 0"></span>
-                            </button>
-                        @endforeach
-                    </div>
+            <!-- Filter Section -->
+            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Filter Jadwal</h3>
+                    <form method="GET" action="{{ route('admin.schedules.index') }}"
+                        class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <!-- Major Filter -->
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jurusan</label>
+                            <select name="major_id" id="majorFilter"
+                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                                onchange="this.form.submit()">
+                                <option value="">Pilih Jurusan</option>
+                                @foreach ($majors as $major)
+                                    <option value="{{ $major->id }}"
+                                        {{ $selectedMajorId == $major->id ? 'selected' : '' }}>
+                                        {{ $major->code }} - {{ $major->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Class Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kelas</label>
+                            <select name="class_id" id="classFilter"
+                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                                onchange="this.form.submit()" {{ !$selectedMajorId ? 'disabled' : '' }}>
+                                <option value="">Pilih Kelas</option>
+                                @foreach ($classes as $class)
+                                    <option value="{{ $class->id }}"
+                                        {{ $selectedClassId == $class->id ? 'selected' : '' }}>
+                                        {{ $class->full_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Template Filter -->
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Template</label>
+                            <select name="template_id" id="templateFilter"
+                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                                onchange="this.form.submit()" {{ !$selectedClassId ? 'disabled' : '' }}>
+                                <option value="">Pilih Template</option>
+                                @foreach ($templates as $template)
+                                    <option value="{{ $template->id }}"
+                                        {{ $selectedTemplateId == $template->id ? 'selected' : '' }}>
+                                        Versi {{ $template->version }} - {{ $template->block->name ?? 'Block' }}
+                                        {{ $template->is_active ? '(Aktif)' : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Reset Button -->
+                        <div class="flex items-end">
+                            <a href="{{ route('admin.schedules.index') }}"
+                                class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                                <x-heroicon-o-arrow-path class="w-4 h-4 mr-1" />
+                                Reset
+                            </a>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <!-- Content Area -->
-            @foreach ($majors as $major)
-                <div x-show="activeTab === '{{ $major->id }}'" x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-
-                    <!-- Loading State -->
-                    <div x-show="loadingMajor === '{{ $major->id }}'"
-                        class="flex items-center justify-center py-20">
-                        <div class="text-center">
-                            <x-heroicon-o-arrow-path class="animate-spin h-10 w-10 text-blue-500 mx-auto mb-3" />
-                            <p class="text-gray-500 dark:text-gray-400 text-sm">Memuat jadwal...</p>
-                        </div>
-                    </div>
-
-                    <!-- Table View -->
-                    <div
-                        x-show="viewMode === 'table' && loadedMajors['{{ $major->id }}'] && loadingMajor !== '{{ $major->id }}'">
-                        <div class="space-y-3">
-                            <template x-for="classItem in loadedMajors['{{ $major->id }}'] || []"
-                                :key="classItem.id">
-                                <div x-show="filteredSearch === '' || classItem.full_name.toLowerCase().includes(filteredSearch.toLowerCase())"
-                                    class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
-
-                                    <!-- Class Header - Clickable -->
-                                    <button
-                                        @click="expandedClass = expandedClass === classItem.id ? null : classItem.id"
-                                        class="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
-                                        <div class="flex items-center gap-4">
-                                            <div
-                                                class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                                                <span
-                                                    x-text="classItem.full_name?.split(' ')[0]?.substring(0, 2) || 'K'"></span>
-                                            </div>
-                                            <div class="text-left">
-                                                <h3 class="font-semibold text-gray-900 dark:text-gray-100"
-                                                    x-text="classItem.full_name"></h3>
-                                                <div class="flex items-center gap-3 mt-0.5">
-                                                    <span class="text-xs text-gray-500 dark:text-gray-400"
-                                                        x-text="getScheduleCount(classItem) + ' pelajaran'"></span>
-                                                    <span x-show="classItem.timetable_templates?.[0]"
-                                                        class="text-xs text-blue-600 dark:text-blue-400 font-medium"
-                                                        x-text="classItem.timetable_templates?.[0]?.version"></span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center gap-3">
-                                            <!-- Quick Day Pills -->
-                                            <div class="hidden sm:flex items-center gap-1">
-                                                <template x-for="dayNum in [1,2,3,4,5,6]" :key="dayNum">
-                                                    <span x-show="classItem.schedule_days?.[dayNum]?.length > 0"
-                                                        class="w-2 h-2 rounded-full"
-                                                        :class="dayColors[dayNum]?.badge"></span>
-                                                </template>
-                                            </div>
-                                            <x-heroicon-o-chevron-down
-                                                class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                                                ::class="expandedClass === classItem.id ? 'rotate-180' : ''" />
-                                        </div>
-                                    </button>
-
-                                    <!-- Expanded Schedule Table -->
-                                    <div x-show="expandedClass === classItem.id" x-collapse x-cloak>
-                                        <div class="border-t border-gray-100 dark:border-slate-700/50">
-                                            <!-- No Schedule -->
-                                            <div x-show="!classItem.schedule_days || Object.keys(classItem.schedule_days).length === 0"
-                                                class="px-5 py-8 text-center">
-                                                <x-heroicon-o-calendar
-                                                    class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
-                                                <p class="text-sm text-gray-400 dark:text-gray-500">Belum ada jadwal
-                                                    untuk kelas ini</p>
-                                            </div>
-
-                                            <!-- Schedule Grid by Day -->
-                                            <div x-show="classItem.schedule_days && Object.keys(classItem.schedule_days).length > 0"
-                                                class="p-4">
-                                                <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
-                                                    <template x-for="dayNum in [1,2,3,4,5,6]" :key="dayNum">
-                                                        <div x-show="classItem.schedule_days?.[dayNum]?.length > 0"
-                                                            class="rounded-xl border p-4"
-                                                            :class="dayColors[dayNum]?.bg + ' ' + dayColors[dayNum]?.border">
-
-                                                            <!-- Day Header -->
-                                                            <div class="flex items-center gap-2 mb-3 pb-2 border-b"
-                                                                :class="dayColors[dayNum]?.border">
-                                                                <span class="w-2 h-2 rounded-full"
-                                                                    :class="dayColors[dayNum]?.badge"></span>
-                                                                <span class="font-semibold text-sm"
-                                                                    :class="dayColors[dayNum]?.text"
-                                                                    x-text="dayNames[dayNum]"></span>
-                                                                <span
-                                                                    class="text-xs text-gray-500 dark:text-gray-400 ml-auto"
-                                                                    x-text="classItem.schedule_days?.[dayNum]?.filter(i => !i.is_break).length + ' mapel'"></span>
-                                                            </div>
-
-                                                            <!-- Schedule Items -->
-                                                            <div class="space-y-2">
-                                                                <template
-                                                                    x-for="(item, idx) in classItem.schedule_days?.[dayNum] || []"
-                                                                    :key="idx">
-                                                                    <div>
-                                                                        <!-- Break -->
-                                                                        <div x-show="item.is_break"
-                                                                            class="flex items-center justify-center gap-2 py-1.5 px-3 bg-amber-100/50 dark:bg-amber-900/30 rounded-lg text-xs text-amber-700 dark:text-amber-300">
-                                                                            <x-heroicon-o-pause class="w-3 h-3" />
-                                                                            <span class="font-medium"
-                                                                                x-text="item.start_time?.substring(0,5)"></span>
-                                                                            <span>Istirahat</span>
-                                                                        </div>
-
-                                                                        <!-- Subject -->
-                                                                        <div x-show="!item.is_break"
-                                                                            class="flex items-start gap-3 py-2 px-3 bg-white/70 dark:bg-slate-800/70 rounded-lg">
-                                                                            <span
-                                                                                class="text-xs font-mono font-semibold text-gray-500 dark:text-gray-400 min-w-[40px]"
-                                                                                x-text="item.period?.start_time?.substring(0,5)"></span>
-                                                                            <div class="flex-1 min-w-0">
-                                                                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"
-                                                                                    x-text="item.teacher_subject?.subject?.name || 'Tanpa Mapel'">
-                                                                                </p>
-                                                                                <p class="text-xs text-gray-500 dark:text-gray-400 truncate"
-                                                                                    x-text="item.teacher_subject?.teacher?.user?.name || '-'">
-                                                                                </p>
-                                                                            </div>
-                                                                            <span x-show="item.room_history?.room"
-                                                                                class="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded flex-shrink-0"
-                                                                                x-text="item.room_history?.room?.name"></span>
-                                                                        </div>
-                                                                    </div>
-                                                                </template>
-                                                            </div>
-                                                        </div>
-                                                    </template>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-
-                        <!-- Empty State -->
-                        <div x-show="!loadedMajors['{{ $major->id }}']?.length" class="text-center py-16">
-                            <x-heroicon-o-academic-cap
-                                class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                            <p class="text-gray-500 dark:text-gray-400">Belum ada kelas pada jurusan ini</p>
-                        </div>
-                    </div>
-
-                    <!-- Compact Card View -->
-                    <div x-show="viewMode === 'compact' && loadedMajors['{{ $major->id }}'] && loadingMajor !== '{{ $major->id }}'"
-                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-                        <template x-for="classItem in loadedMajors['{{ $major->id }}'] || []"
-                            :key="classItem.id">
-                            <div x-show="filteredSearch === '' || classItem.full_name.toLowerCase().includes(filteredSearch.toLowerCase())"
-                                class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-shadow">
-
-                                <!-- Card Header -->
-                                <div
-                                    class="px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500">
-                                    <div class="flex items-center justify-between">
-                                        <h4 class="font-semibold text-white text-sm truncate"
-                                            x-text="classItem.full_name"></h4>
-                                        <span x-show="classItem.timetable_templates?.[0]"
-                                            class="text-xs text-white/80 bg-white/20 px-2 py-0.5 rounded"
-                                            x-text="classItem.timetable_templates?.[0]?.version"></span>
-                                    </div>
-                                </div>
-
-                                <!-- Card Body -->
-                                <div class="p-4 max-h-[400px] overflow-y-auto scrollbar-thin">
-                                    <!-- No Schedule -->
-                                    <div x-show="!classItem.schedule_days || Object.keys(classItem.schedule_days).length === 0"
-                                        class="text-center py-6">
-                                        <x-heroicon-o-calendar
-                                            class="w-10 h-10 text-gray-200 dark:text-gray-700 mx-auto mb-2" />
-                                        <p class="text-xs text-gray-400">Belum ada jadwal</p>
-                                    </div>
-
-                                    <!-- Schedule by Day -->
-                                    <div x-show="classItem.schedule_days && Object.keys(classItem.schedule_days).length > 0"
-                                        class="space-y-3">
-                                        <template x-for="dayNum in [1,2,3,4,5,6]" :key="dayNum">
-                                            <div x-show="classItem.schedule_days?.[dayNum]?.length > 0">
-                                                <!-- Day Label -->
-                                                <div class="flex items-center gap-2 mb-2">
-                                                    <span class="w-1.5 h-1.5 rounded-full"
-                                                        :class="dayColors[dayNum]?.badge"></span>
-                                                    <span class="text-xs font-semibold"
-                                                        :class="dayColors[dayNum]?.text"
-                                                        x-text="dayNames[dayNum]"></span>
-                                                </div>
-
-                                                <!-- Items -->
-                                                <div class="space-y-1.5 pl-3.5 border-l-2"
-                                                    :class="dayColors[dayNum]?.border">
-                                                    <template
-                                                        x-for="(item, idx) in classItem.schedule_days?.[dayNum]?.filter(i => !i.is_break).slice(0, 4) || []"
-                                                        :key="idx">
-                                                        <div class="flex items-center gap-2 text-xs">
-                                                            <span class="text-gray-400 font-mono min-w-[35px]"
-                                                                x-text="item.period?.start_time?.substring(0,5)"></span>
-                                                            <span class="text-gray-700 dark:text-gray-300 truncate"
-                                                                x-text="item.teacher_subject?.subject?.name || '-'"></span>
-                                                        </div>
-                                                    </template>
-                                                    <template
-                                                        x-if="classItem.schedule_days?.[dayNum]?.filter(i => !i.is_break).length > 4">
-                                                        <p class="text-xs text-gray-400"
-                                                            x-text="'+' + (classItem.schedule_days?.[dayNum]?.filter(i => !i.is_break).length - 4) + ' lainnya'">
-                                                        </p>
-                                                    </template>
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </div>
-
-                                <!-- Card Footer -->
-                                <div
-                                    class="px-4 py-2.5 bg-gray-50 dark:bg-slate-700/50 border-t border-gray-100 dark:border-slate-700 flex items-center justify-between">
-                                    <span class="text-xs text-gray-500 dark:text-gray-400"
-                                        x-text="getScheduleCount(classItem) + ' pelajaran'"></span>
-                                    <div class="flex gap-0.5">
-                                        <template x-for="dayNum in [1,2,3,4,5,6]" :key="dayNum">
-                                            <span class="w-1.5 h-1.5 rounded-full"
-                                                :class="classItem.schedule_days?.[dayNum]?.length > 0 ? dayColors[dayNum]
-                                                    ?.badge : 'bg-gray-200 dark:bg-gray-600'"></span>
-                                        </template>
-                                    </div>
-                                </div>
+            <!-- Schedule Grid -->
+            @if ($selectedTemplate)
+                <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                                    Jadwal Kelas {{ $selectedTemplate->class->full_name }}
+                                </h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                    Template Versi {{ $selectedTemplate->version }} -
+                                    {{ $selectedTemplate->block->name ?? 'Block' }}
+                                    @if ($selectedTemplate->is_active)
+                                        <span
+                                            class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                                            Aktif
+                                        </span>
+                                    @endif
+                                </p>
                             </div>
-                        </template>
+                        </div>
+
+                        <!-- Schedule Table -->
+                        <div class="overflow-x-auto">
+                            <table
+                                class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-900">
+                                    <tr>
+                                        <th
+                                            class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700 w-20">
+                                            Jam
+                                        </th>
+                                        @foreach ($days as $dayNum => $dayName)
+                                            <th
+                                                class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700 last:border-r-0">
+                                                {{ $dayName }}
+                                            </th>
+                                        @endforeach
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                    @foreach ($periods as $period)
+                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-900">
+                                            <td
+                                                class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                                                <div class="text-center">
+                                                    @if ($period->is_teaching)
+                                                        <div class="font-bold">Jam {{ $period->ordinal }}</div>
+                                                    @else
+                                                        <div
+                                                            class="text-xs uppercase font-extrabold text-orange-600 dark:text-orange-400">
+                                                            {{ $period->ordinal }}
+                                                        </div>
+                                                    @endif
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                        {{ \Carbon\Carbon::parse($period->start_time)->format('H:i') }}
+                                                        - {{ \Carbon\Carbon::parse($period->end_time)->format('H:i') }}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            @foreach ($days as $dayNum => $dayName)
+                                                @php
+                                                    $cellKey = $dayNum . '-' . $period->id;
+                                                    $cellEntry = $entries->get($cellKey)?->first();
+                                                @endphp
+                                                <td
+                                                    class="px-2 py-2 text-sm border-r border-gray-200 dark:border-gray-700 last:border-r-0 align-top min-w-[150px]">
+                                                    @if ($cellEntry)
+                                                        <div
+                                                            class="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-2 relative group">
+                                                            <div
+                                                                class="font-medium text-indigo-900 dark:text-indigo-100 text-xs">
+                                                                {{ $cellEntry->teacherSubject?->subject?->name ?? '-' }}
+                                                            </div>
+                                                            <div
+                                                                class="text-xs text-indigo-700 dark:text-indigo-300 mt-1">
+                                                                {{ $cellEntry->teacherSubject?->teacher?->user?->name ?? '-' }}
+                                                            </div>
+                                                            @if ($cellEntry->roomHistory?->room)
+                                                                <div
+                                                                    class="text-xs text-indigo-600 dark:text-indigo-400 mt-1">
+                                                                    <x-heroicon-o-map-pin class="w-3 h-3 inline" />
+                                                                    {{ $cellEntry->roomHistory->room->name }}
+                                                                </div>
+                                                            @endif
+                                                            <!-- Action buttons -->
+                                                            <div
+                                                                class="absolute top-1 right-1 hidden group-hover:flex gap-1">
+                                                                <button type="button"
+                                                                    onclick="editEntry('{{ $cellEntry->id }}', '{{ $cellEntry->teacher_subject_id }}', '{{ $cellEntry->room_history_id }}')"
+                                                                    class="p-1 text-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded transition-colors">
+                                                                    <x-heroicon-o-pencil class="w-3 h-3" />
+                                                                </button>
+                                                                <button type="button"
+                                                                    onclick="deleteEntry('{{ $cellEntry->id }}')"
+                                                                    class="p-1 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded transition-colors">
+                                                                    <x-heroicon-o-trash class="w-3 h-3" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    @else
+                                                        @if ($period->is_teaching)
+                                                            <button type="button"
+                                                                onclick="addEntry('{{ $selectedTemplateId }}', {{ $dayNum }}, '{{ $period->id }}')"
+                                                                class="w-full h-16 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-indigo-400 dark:hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors group">
+                                                                <x-heroicon-o-plus
+                                                                    class="w-5 h-5 text-gray-400 group-hover:text-indigo-500" />
+                                                            </button>
+                                                        @else
+                                                            <div
+                                                                class="w-full h-16 flex items-center justify-center bg-gray-100 dark:bg-gray-900/50 rounded-lg border border-transparent">
+                                                                <span
+                                                                    class="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500 tracking-tighter">
+                                                                    {{ $period->ordinal }}
+                                                                </span>
+                                                            </div>
+                                                        @endif
+                                                    @endif
+                                                </td>
+                                            @endforeach
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            @endforeach
+            @else
+                <!-- Empty State -->
+                <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
+                    <div class="p-12 text-center">
+                        <x-heroicon-o-calendar-days class="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                        <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">Pilih Filter</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            Pilih jurusan, kelas, dan template untuk melihat jadwal
+                        </p>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
+
+    <!-- Add Entry Modal -->
+    <x-modal name="add-entry-modal" focusable>
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                    Tambah Jadwal
+                </h2>
+                <button type="button" x-on:click="$dispatch('close')"
+                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <x-heroicon-o-x-mark class="w-6 h-6" />
+                </button>
+            </div>
+
+            <form id="addEntryForm" method="POST" action="{{ route('admin.schedules.entries.store') }}"
+                class="space-y-4">
+                @csrf
+                <input type="hidden" name="template_id" id="addTemplateId">
+                <input type="hidden" name="day_of_week" id="addDayOfWeek">
+                <input type="hidden" name="period_id" id="addPeriodId">
+
+                <div id="addEntryInfo"
+                    class="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 text-sm text-gray-600 dark:text-gray-400">
+                    <!-- Info will be populated by JS -->
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Guru & Mata
+                        Pelajaran *</label>
+                    <select name="teacher_subject_id" id="addTeacherSubject" required
+                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                        <option value="">Pilih Guru & Mata Pelajaran</option>
+                        @foreach ($teacherSubjects as $ts)
+                            <option value="{{ $ts->id }}">
+                                {{ $ts->teacher?->user?->name ?? 'Guru' }} - {{ $ts->subject?->name ?? 'Mapel' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ruangan
+                        (Opsional)</label>
+                    <select name="room_history_id" id="addRoomHistory"
+                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                        <option value="">Tanpa Ruangan</option>
+                        @foreach ($roomHistories as $rh)
+                            <option value="{{ $rh->id }}">
+                                {{ $rh->room?->name ?? 'Ruangan' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div
+                    class="bg-gray-50 dark:bg-gray-900 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 -mx-6 -mb-6 mt-6">
+                    <button type="submit"
+                        class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 sm:ml-3 sm:w-auto">
+                        Simpan
+                    </button>
+                    <button type="button" x-on:click="$dispatch('close')"
+                        class="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 sm:mt-0 sm:w-auto">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </x-modal>
+
+    <!-- Edit Entry Modal -->
+    <x-modal name="edit-entry-modal" focusable>
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                    Edit Jadwal
+                </h2>
+                <button type="button" x-on:click="$dispatch('close')"
+                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <x-heroicon-o-x-mark class="w-6 h-6" />
+                </button>
+            </div>
+
+            <form id="editEntryForm" method="POST" class="space-y-4">
+                @csrf
+                @method('PUT')
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Guru & Mata
+                        Pelajaran *</label>
+                    <select name="teacher_subject_id" id="editTeacherSubject" required
+                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                        <option value="">Pilih Guru & Mata Pelajaran</option>
+                        @foreach ($teacherSubjects as $ts)
+                            <option value="{{ $ts->id }}">
+                                {{ $ts->teacher?->user?->name ?? 'Guru' }} - {{ $ts->subject?->name ?? 'Mapel' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ruangan
+                        (Opsional)</label>
+                    <select name="room_history_id" id="editRoomHistory"
+                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                        <option value="">Tanpa Ruangan</option>
+                        @foreach ($roomHistories as $rh)
+                            <option value="{{ $rh->id }}">
+                                {{ $rh->room?->name ?? 'Ruangan' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div
+                    class="bg-gray-50 dark:bg-gray-900 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 -mx-6 -mb-6 mt-6">
+                    <button type="submit"
+                        class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 sm:ml-3 sm:w-auto">
+                        Simpan Perubahan
+                    </button>
+                    <button type="button" x-on:click="$dispatch('close')"
+                        class="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 sm:mt-0 sm:w-auto">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </x-modal>
+
+    <!-- Delete Entry Modal -->
+    <x-modal name="delete-entry-modal" focusable>
+        <div class="p-6">
+            <div class="flex items-start mb-4">
+                <div class="flex-shrink-0">
+                    <x-heroicon-o-exclamation-triangle class="w-6 h-6 text-red-600 dark:text-red-400" />
+                </div>
+                <div class="ml-3 flex-1">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                        Hapus Jadwal
+                    </h3>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                        Apakah Anda yakin ingin menghapus jadwal ini? Tindakan ini tidak dapat dibatalkan.
+                    </p>
+                </div>
+            </div>
+
+            <form id="deleteEntryForm" method="POST">
+                @csrf
+                @method('DELETE')
+
+                <div
+                    class="bg-gray-50 dark:bg-gray-900 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 -mx-6 -mb-6 mt-6">
+                    <button type="submit"
+                        class="inline-flex w-full justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto">
+                        Hapus
+                    </button>
+                    <button type="button" x-on:click="$dispatch('close')"
+                        class="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 sm:mt-0 sm:w-auto">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </x-modal>
+
+    <script>
+        const days = @json($days);
+
+        function addEntry(templateId, dayOfWeek, periodId) {
+            document.getElementById('addTemplateId').value = templateId;
+            document.getElementById('addDayOfWeek').value = dayOfWeek;
+            document.getElementById('addPeriodId').value = periodId;
+
+            const dayName = days[dayOfWeek] || 'Hari';
+            document.getElementById('addEntryInfo').innerHTML = `<strong>Hari:</strong> ${dayName}`;
+
+            window.dispatchEvent(new CustomEvent('open-modal', {
+                detail: 'add-entry-modal'
+            }));
+        }
+
+        function editEntry(entryId, teacherSubjectId, roomHistoryId) {
+            const form = document.getElementById('editEntryForm');
+            form.action = `/admin/schedules/entries/${entryId}`;
+
+            document.getElementById('editTeacherSubject').value = teacherSubjectId || '';
+            document.getElementById('editRoomHistory').value = roomHistoryId || '';
+
+            window.dispatchEvent(new CustomEvent('open-modal', {
+                detail: 'edit-entry-modal'
+            }));
+        }
+
+        function deleteEntry(entryId) {
+            const form = document.getElementById('deleteEntryForm');
+            form.action = `/admin/schedules/entries/${entryId}`;
+
+            window.dispatchEvent(new CustomEvent('open-modal', {
+                detail: 'delete-entry-modal'
+            }));
+        }
+    </script>
 </x-app-layout>

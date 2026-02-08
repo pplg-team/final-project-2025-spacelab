@@ -647,6 +647,13 @@
                                 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wide flex items-center gap-2">
                                 Pelajaran Jurusan
                             </h3>
+
+                            <div class="flex items-center gap-2">
+                                <a href="{{ "#" }}"
+                                    class="ml-auto inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                                    {{ __('Tambah') }}
+                                </a>
+                            </div>
                         </div>
                         <div class="p-4 sm:p-6">
                             @if ($majorSubjects->isEmpty())

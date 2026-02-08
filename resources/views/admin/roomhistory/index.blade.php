@@ -354,11 +354,11 @@
             disableElement('event_type', true);
 
             if (mode === 'create') {
-                form.action = "{{ route('staff.rooms.history.store') }}";
+                form.action = "{{ route('admin.rooms.history.store') }}";
                 methodInput.value = 'POST';
                 title.innerText = 'Tambah Alokasi Ruangan';
             } else {
-                form.action = `/staff/room-history/${data.id}`;
+                form.action = `/admin/room-history/${data.id}`;
                 methodInput.value = 'PUT';
                 title.innerText = 'Edit Alokasi Ruangan';
 
@@ -393,7 +393,7 @@
         function confirmDelete(id) {
             if (confirm('⚠️ Apakah Anda yakin ingin menghapus riwayat ini?\n\nTindakan ini tidak dapat dibatalkan.')) {
                 const form = document.getElementById('deleteForm');
-                form.action = `/staff/room-history/${id}`;
+                form.action = `/admin/room-history/${id}`;
                 form.submit();
             }
         }

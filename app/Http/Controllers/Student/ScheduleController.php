@@ -41,9 +41,10 @@ class ScheduleController extends Controller
             ]);
         }
 
-        // Ambil semua jadwal dengan relasi model
+        // Ambil semua jadwal yang memiliki template aktif  dengan relasi model
         $allSchedulesRaw = \App\Models\TimetableEntry::whereHas('template', function($q) use ($classIds) {
-                $q->whereIn('class_id', $classIds);
+                $q->whereIn('class_id', $classIds)
+                ->where('is_active', true);
             })
             ->whereBetween('day_of_week', [1, 7])
             ->with([

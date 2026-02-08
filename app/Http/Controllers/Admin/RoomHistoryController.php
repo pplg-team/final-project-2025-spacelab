@@ -47,7 +47,7 @@ class RoomHistoryController extends Controller
         $terms = Term::all();
         $allRooms = Room::all();
 
-        return view('staff.roomhistory.index', [
+        return view('admin.roomhistory.index', [
             'title' => 'Riwayat Status Ruangan',
             'description' => 'Halaman riwayat ruangan dan penggunaan saat ini',
             'rooms' => $rooms,
