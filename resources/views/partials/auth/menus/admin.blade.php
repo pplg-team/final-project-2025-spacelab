@@ -68,7 +68,7 @@
     Jadwal Sekolah
 </a>
 
-<a href="#"
+<a href="{{ route('admin.reports.index') }}"
    class="flex items-center gap-3 px-4 py-2 text-sm rounded-md hover:bg-slate-200 dark:hover:bg-slate-800
    {{ request()->routeIs('admin.reports.index') ? 'bg-slate-200 dark:bg-slate-800 font-semibold' : '' }}">
     <x-heroicon-o-document-chart-bar class="w-5 h-5" />

@@ -29,6 +29,7 @@ use App\Http\Controllers\Staff\Major\TemplateController as StaffMajorTemplateCon
 use App\Http\Controllers\Staff\Teacher\ImportController as StaffTeacherImportController;
 use App\Http\Controllers\Staff\Teacher\TemplateController as StaffTeacherTemplateController;
 use App\Http\Controllers\Staff\SubjectController as StaffSubjectController;
+use App\Http\Controllers\Staff\ReportController as StaffReportController;
 
 Route::middleware(['auth', 'role:Staff'])
     ->prefix('staff')
@@ -126,5 +127,12 @@ Route::middleware(['auth', 'role:Staff'])
 
         Route::get('/schedules', [StaffScheduleController::class, 'index'])->name('schedules.index');
         Route::get('/schedules/major/{majorId}', [StaffScheduleController::class, 'getMajorSchedules'])->name('schedules.major');
+
+        // Reports
+        Route::get('/reports', [StaffReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/students', [StaffReportController::class, 'students'])->name('reports.students');
+        Route::get('/reports/students/export', [StaffReportController::class, 'exportStudents'])->name('reports.students.export');
+        Route::get('/reports/teachers', [StaffReportController::class, 'teachers'])->name('reports.teachers');
+        Route::get('/reports/teachers/export', [StaffReportController::class, 'exportTeachers'])->name('reports.teachers.export');
     });
 

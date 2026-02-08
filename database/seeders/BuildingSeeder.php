@@ -10,16 +10,17 @@ class BuildingSeeder extends Seeder
     public function run(): void
     {
         $buildings = [
-            ['code' => 'G_A', 'name' => 'Gedung A'],
-            ['code' => 'G_B', 'name' => 'Gedung B'],
-            ['code' => 'G_C', 'name' => 'Gedung C'],
-            ['code' => 'G_D', 'name' => 'Gedung D'],
-            ['code' => 'G_E', 'name' => 'Gedung E'],
-            ['code' => 'G_F', 'name' => 'Gedung F'],
-            ['code' => 'G_G', 'name' => 'Gedung G'],
-            ['code' => 'G_H', 'name' => 'Gedung H'],
-            ['code' => 'G_I', 'name' => 'Gedung I'],
-            ['code' => 'G_OUT', 'name' => 'Outdoor'],
+            ['code' => 'GBR', 'name' => 'Gedung Baru'],
+            ['code' => 'GRPL', 'name' => 'Gedung RPL'],
+            ['code' => 'GDPIB', 'name' => 'Gedung DPIB'],
+            ['code' => 'GTKJ', 'name' => 'Gedung TKJ'],
+            ['code' => 'GTMR', 'name' => 'Gedung Timur'],
+            ['code' => 'GTITL', 'name' => 'Gedung TITL'],
+            ['code' => 'GTSM', 'name' => 'Gedung TSM'],
+            ['code' => 'GTEI', 'name' => 'Gedung TEI'],
+            ['code' => 'GTFLM', 'name' => 'Gedung TFLM'],
+            ['code' => 'BTKR', 'name' => 'Bengkel TKR'],
+
         ];
 
         foreach ($buildings as $b) {

@@ -23,7 +23,8 @@ use App\Http\Controllers\Admin\{
     StudentController as AdminStudentController,
     RoomController as AdminRoomController,
     BuildingController as AdminBuildingController,
-    RoomHistoryController as AdminRoomHistoryController
+    RoomHistoryController as AdminRoomHistoryController,
+    ReportController as AdminReportController
 };
 use App\Http\Controllers\Admin\Term\BlockController as AdminBlockController;
 use App\Http\Controllers\Admin\Major\CompanyRelationController as AdminCompanyRelationController;
@@ -156,5 +157,14 @@ Route::middleware(['auth', 'role:Admin'])
         // AJAX endpoints for cascading filters
         Route::get('/schedules/classes', [AdminTimetableEntryController::class, 'getClassesByMajor'])->name('schedules.classes');
         Route::get('/schedules/templates-by-class', [AdminTimetableEntryController::class, 'getTemplatesByClass'])->name('schedules.templates-by-class');
+
+        // Reports
+        Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/students', [AdminReportController::class, 'students'])->name('reports.students');
+        Route::get('/reports/students/export', [AdminReportController::class, 'exportStudents'])->name('reports.students.export');
+        Route::get('/reports/teachers', [AdminReportController::class, 'teachers'])->name('reports.teachers');
+        Route::get('/reports/teachers/export', [AdminReportController::class, 'exportTeachers'])->name('reports.teachers.export');
+        Route::get('/reports/schedules', [AdminReportController::class, 'schedules'])->name('reports.schedules');
+        Route::get('/reports/rooms', [AdminReportController::class, 'rooms'])->name('reports.rooms');
     });
 
