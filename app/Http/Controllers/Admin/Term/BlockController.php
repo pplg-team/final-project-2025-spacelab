@@ -34,7 +34,7 @@ class BlockController extends Controller
 
             Block::create($validated);
 
-            return redirect()->route('staff.terms.index')->with('success', 'Block berhasil ditambahkan');
+            return redirect()->route('admin.terms.index')->with('success', 'Block berhasil ditambahkan');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->back()->withErrors($e->validator)->withInput();
         } catch (\Exception $e) {
@@ -79,7 +79,7 @@ class BlockController extends Controller
 
             $block->update($validated);
 
-            return redirect()->route('staff.terms.index')->with('success', 'Block berhasil diperbarui');
+            return redirect()->route('admin.terms.index')->with('success', 'Block berhasil diperbarui');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->back()->withErrors($e->validator)->withInput();
         } catch (\Exception $e) {
@@ -94,7 +94,7 @@ class BlockController extends Controller
     {
         try {
             $block->delete();
-            return redirect()->route('staff.terms.index')->with('success', 'Block berhasil dihapus');
+            return redirect()->route('admin.terms.index')->with('success', 'Block berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus block: ' . $e->getMessage());
         }

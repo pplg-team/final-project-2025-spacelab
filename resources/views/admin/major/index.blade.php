@@ -100,7 +100,7 @@
                                 <div
                                     class="pt-4 border-t border-gray-200 dark:border-gray-600 flex justify-between items-center space-x-2">
 
-                                    <a href="{{ route('staff.majors.show', $major->id) }}"
+                                    <a href="{{ route('admin.majors.show', $major->id) }}"
                                         class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150 cursor-pointer">
                                         Lihat
                                     </a>
@@ -111,7 +111,7 @@
                                             Edit
                                         </x-secondary-button>
 
-                                        <form action="{{ route('staff.majors.destroy', $major->id) }}" method="POST"
+                                        <form action="{{ route('admin.majors.destroy', $major->id) }}" method="POST"
                                             class="inline"
                                             onsubmit="return confirm('Apakah Anda yakin ingin menghapus jurusan ini?');">
                                             @csrf
@@ -164,7 +164,7 @@
             </div>
 
             <form id="majorForm" method="POST" enctype="multipart/form-data"
-                data-store-route="{{ route('staff.majors.store') }}">
+                data-store-route="{{ route('admin.majors.store') }}">
                 @csrf
                 <input type="hidden" id="formMethod" name="_method" value="POST">
 
@@ -263,14 +263,14 @@
             </p>
 
             <div class="mb-4">
-                <a href="{{ route('staff.majors.template') }}" target="_blank"
+                <a href="{{ route('admin.majors.template') }}" target="_blank"
                     class="inline-flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                     <x-heroicon-o-arrow-down-tray class="w-4 h-4 mr-2" />
                     Download Template
                 </a>
             </div>
 
-            <form method="POST" action="{{ route('staff.majors.import') }}" enctype="multipart/form-data"
+            <form method="POST" action="{{ route('admin.majors.import') }}" enctype="multipart/form-data"
                 class="space-y-4">
                 @csrf
 

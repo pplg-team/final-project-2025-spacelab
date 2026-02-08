@@ -297,7 +297,7 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('staff.buildings.store') }}" class="space-y-4">
+            <form method="POST" action="{{ route('admin.buildings.store') }}" class="space-y-4">
                 @csrf
 
                 <div>
@@ -457,7 +457,7 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('staff.rooms.store') }}" class="space-y-4">
+            <form method="POST" action="{{ route('admin.rooms.store') }}" class="space-y-4">
                 @csrf
 
                 <div class="grid grid-cols-2 gap-4">
@@ -702,5 +702,5 @@
         </div>
     </x-modal>
 
-    @vite(['resources/js/staff/room-index.js'])
+    @vite(['resources/js/admin/room-index.js'])
 </x-app-layout>

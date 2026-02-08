@@ -185,7 +185,7 @@
 
     <!-- Term Modal -->
     <x-modal name="termModal" :show="false" focusable>
-        <form id="termForm" method="POST" action="{{ route('staff.terms.store') }}">
+        <form id="termForm" method="POST" action="{{ route('admin.terms.store') }}">
             @csrf
             <input type="hidden" name="_method" id="termMethod" value="POST">
             <input type="hidden" name="term_id" id="termId">
@@ -248,7 +248,7 @@
 
     <!-- Block Modal -->
     <x-modal name="blockModal" :show="false" focusable>
-        <form id="blockForm" method="POST" action="{{ route('staff.blocks.store') }}">
+        <form id="blockForm" method="POST" action="{{ route('admin.blocks.store') }}">
             @csrf
             <input type="hidden" name="_method" id="blockMethod" value="POST">
             <input type="hidden" name="terms_id" id="block_terms_id">
@@ -301,12 +301,12 @@
     <script>
         // Configure routes for JavaScript
         window.termRoutes = {
-            base: '/staff/terms',
-            store: '{{ route('staff.terms.store') }}'
+            base: '/admin/terms',
+            store: '{{ route('admin.terms.store') }}'
         };
         window.blockRoutes = {
-            base: '/staff/blocks',
-            store: '{{ route('staff.blocks.store') }}'
+            base: '/admin/blocks',
+            store: '{{ route('admin.blocks.store') }}'
         };
         window.csrfToken = '@csrf';
     </script>

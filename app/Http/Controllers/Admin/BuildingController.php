@@ -23,7 +23,7 @@ class BuildingController extends Controller
 
         Building::create($validated);
 
-        return redirect()->route('staff.rooms.index')
+        return redirect()->route('admin.rooms.index')
             ->with('success', 'Gedung berhasil ditambahkan.');
     }
 
@@ -56,7 +56,7 @@ class BuildingController extends Controller
 
         $building->update($validated);
 
-        return redirect()->route('staff.rooms.index')
+        return redirect()->route('admin.rooms.index')
             ->with('success', 'Gedung berhasil diperbarui.');
     }
 
@@ -67,13 +67,13 @@ class BuildingController extends Controller
     {
         // Check if building has rooms
         if ($building->rooms()->exists()) {
-            return redirect()->route('staff.rooms.index')
+            return redirect()->route('admin.rooms.index')
                 ->with('error', 'Gedung tidak dapat dihapus karena masih memiliki ruangan.');
         }
 
         $building->delete();
 
-        return redirect()->route('staff.rooms.index')
+        return redirect()->route('admin.rooms.index')
             ->with('success', 'Gedung berhasil dihapus.');
     }
 }

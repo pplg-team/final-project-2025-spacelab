@@ -26,7 +26,7 @@ class MajorController extends Controller
             ->orderBy('code')
             ->paginate(9);
 
-        return view('staff.major.index', [
+        return view('admin.major.index', [
             'majors' => $majors,
             'title' => 'Jurusan',
             'description' => 'Halaman manajemen jurusan',
@@ -142,8 +142,7 @@ class MajorController extends Controller
         }
         $eligibleTeachers = $eligibleTeachers->get()->sortBy('user.name');
 
-
-        return view('staff.major.show', [
+        return view('admin.major.show', [
             'major' => $major,
             'assignment' => $assignment,
             'classes' => $classes,
@@ -191,7 +190,7 @@ class MajorController extends Controller
 
         Major::create($validated);
 
-        return redirect()->route('staff.majors.index')
+        return redirect()->route('admin.majors.index')
             ->with('success', 'Jurusan berhasil ditambahkan');
     }
 
@@ -244,7 +243,7 @@ class MajorController extends Controller
     {
         // Check if major has classes
         if ($major->classes()->count() > 0) {
-            return redirect()->route('staff.majors.index')
+            return redirect()->route('admin.majors.index')
                 ->with('error', 'Jurusan tidak dapat dihapus karena masih memiliki kelas');
         }
 
@@ -255,7 +254,7 @@ class MajorController extends Controller
 
         $major->delete();
 
-        return redirect()->route('staff.majors.index')
+        return redirect()->route('admin.majors.index')
             ->with('success', 'Jurusan berhasil dihapus');
     }
 }

@@ -20,7 +20,7 @@ class TeacherController extends Controller
 
         $subjects = Subject::orderBy('name')->get();
 
-        return view('staff.teacher.index', [
+        return view('admin.teacher.index', [
             'title' => 'Guru',
             'description' => 'Halaman guru',
             'teachers' => $teachers,

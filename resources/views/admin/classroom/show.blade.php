@@ -78,6 +78,20 @@
                     </div>
                 </div>
 
+                <div class="mb-4">
+                    <p>
+                        <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600">
+
+                            {{ $activeTerm
+                                ? 'Semester ' . ucfirst($activeTerm->kind) . ' Tahun Ajaran ' . $activeTerm->tahun_ajaran
+                                : 'Tahun Ajaran Tidak Diketahui'
+                            }}
+
+                        </span>
+                    </p>
+                </div>
+
                 <!-- Guardian Section -->
                 <div class="mb-10 sm:mb-12">
                     <div class="flex items-center justify-between mb-4 sm:mb-6">
@@ -262,7 +276,7 @@
     <x-modal name="guardianModal" :show="false" focusable>
         <div class="p-6 sm:p-8">
             <h2 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Pilih Wali Kelas</h2>
-            <form method="POST" action="{{ route('staff.classrooms.guardian.update', $classroom->id) }}">
+            <form method="POST" action="{{ route('admin.classrooms.guardian.update', $classroom->id) }}">
                 @csrf
                 <div class="mb-6">
                     <label for="teacher_id"
@@ -311,7 +325,7 @@
                     </button>
                 </div>
             @else
-                <form method="POST" action="{{ route('staff.classrooms.students.store', $classroom->id) }}">
+                <form method="POST" action="{{ route('admin.classrooms.students.store', $classroom->id) }}">
                     @csrf
                     <div class="mb-6">
                         <label for="student_id"
@@ -365,7 +379,7 @@
         function deleteStudent(studentId, studentName) {
             if (confirm('Apakah Anda yakin ingin menghapus siswa "' + studentName + '" dari kelas ini?')) {
                 const form = document.getElementById('deleteStudentForm');
-                form.action = "{{ route('staff.classrooms.students.destroy', [$classroom->id, ':studentId']) }}".replace(
+                form.action = "{{ route('admin.classrooms.students.destroy', [$classroom->id, ':studentId']) }}".replace(
                     ':studentId', studentId);
                 form.submit();
             }

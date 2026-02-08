@@ -62,7 +62,7 @@
 
             <!-- Search Bar -->
             <div class="mb-6">
-                <form method="GET" action="{{ route('staff.subjects.index') }}">
+                <form method="GET" action="{{ route('admin.subjects.index') }}">
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,100 +77,95 @@
                 </form>
             </div>
 
-            <!-- Subjects Grid -->
-            <div class="grid grid-cols-1 gap-4">
+            <!-- Subjects Table -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 @forelse ($subjects as $subject)
-                    <div
-                        class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
-                        <div class="p-6">
-                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <!-- Subject Info -->
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-3 mb-2">
-                                        <span
-                                            class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                                            {{ $subject->code }}
+                    @if ($loop->first)
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-900">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Kode</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Nama Mata Pelajaran</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Tipe</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Jurusan Diizinkan</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Guru</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    @endif
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $subject->code }}</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $subject->name }}</p>
+                                            @if ($subject->description)
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ Str::limit($subject->description, 50) }}</p>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex px-2.5 py-0.5 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
+                                            {{ ucfirst($subject->type) }}
                                         </span>
-                                        @if ($subject->type)
-                                            <span
-                                                class="text-xs text-gray-500 dark:text-gray-400">{{ $subject->type }}</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        @if ($subject->allowedMajors->isNotEmpty())
+                                            <div class="flex flex-wrap gap-1">
+                                                @foreach ($subject->allowedMajors->take(3) as $allowed)
+                                                    <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">
+                                                        {{ $allowed->major->code }}
+                                                    </span>
+                                                @endforeach
+                                                @if ($subject->allowedMajors->count() > 3)
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400">+{{ $subject->allowedMajors->count() - 3 }}</span>
+                                                @endif
+                                            </div>
+                                        @else
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">-</span>
                                         @endif
-                                    </div>
-                                    <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">
-                                        {{ $subject->name }}
-                                    </h4>
-                                    @if ($subject->description)
-                                        <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
-                                            {{ $subject->description }}
-                                        </p>
-                                    @endif
-                                </div>
-
-                                <!-- Stats & Actions -->
-                                <div class="flex items-center gap-4">
-                                    <!-- Stats -->
-                                    <div
-                                        class="flex items-center gap-4 pr-4 border-r border-gray-200 dark:border-gray-700">
-                                        <div class="text-center">
-                                            <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                                {{ $subject->majors->count() }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        @if ($subject->teachers->isNotEmpty())
+                                            <div class="flex flex-wrap gap-1">
+                                                @foreach ($subject->teachers->take(2) as $teacher)
+                                                    <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200">
+                                                        {{ Str::limit($teacher->user->name, 20) }}
+                                                    </span>
+                                                @endforeach
+                                                @if ($subject->teachers->count() > 2)
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400">+{{ $subject->teachers->count() - 2 }}</span>
+                                                @endif
                                             </div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">Jurusan</div>
+                                        @else
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">-</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-xl font-medium">
+                                        <div class="flex justify-end gap-4">
+                                            <button onclick='openSubjectModal(@json($subject))'
+                                                class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
+                                                title="Edit">
+                                                <x-heroicon-o-pencil-square class="w-6 h-6" />
+                                            </button>
+                                            <button onclick="deleteSubject('{{ $subject->id }}')"
+                                                class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
+                                                title="Hapus">
+                                                <x-heroicon-o-trash class="w-6 h-6" />
+                                            </button>
                                         </div>
-                                        <div class="text-center">
-                                            <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                                {{ $subject->teachers->count() }}
-                                            </div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">Guru</div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Action Buttons -->
-                                    <div class="flex items-center gap-2">
-                                        <button onclick='openMajorsModal(@json($subject))'
-                                            class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200"
-                                            title="Kelola Jurusan">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                            </svg>
-                                        </button>
-                                        <button onclick='openTeachersModal(@json($subject))'
-                                            class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200"
-                                            title="Kelola Guru">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                            </svg>
-                                        </button>
-                                        <button onclick='openSubjectModal(@json($subject))'
-                                            class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200"
-                                            title="Edit">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                        </button>
-                                        <button onclick="deleteSubject('{{ $subject->id }}')"
-                                            class="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200"
-                                            title="Hapus">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                    </td>
+                                </tr>
+                    @if ($loop->last)
+                            </tbody>
+                        </table>
                     </div>
+                    @endif
                 @empty
-                    <div
-                        class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
+                    <div class="p-12 text-center">
                         <svg class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -180,8 +175,7 @@
                         <button onclick="openSubjectModal()"
                             class="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
                             Tambah mata pelajaran pertama
                         </button>
@@ -200,7 +194,7 @@
 
     <!-- Create/Edit Subject Modal -->
     <x-modal name="subjectModal" :show="false" focusable>
-        <form id="subjectForm" method="POST" action="{{ route('staff.subjects.store') }}" class="p-6">
+        <form id="subjectForm" method="POST" action="{{ route('admin.subjects.store') }}" class="p-6">
             @csrf
             <input type="hidden" name="_method" id="subjectMethod" value="POST">
 
@@ -247,6 +241,25 @@
                 </div>
 
                 <div>
+                    <label for="allowedMajors" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        Jurusan yang Diizinkan <span class="text-gray-400 text-xs">(Opsional)</span>
+                    </label>
+                    <div class="max-h-48 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg p-3 space-y-2 bg-gray-50 dark:bg-gray-700">
+                        @forelse ($majors as $major)
+                            <label class="flex items-center cursor-pointer hover:bg-white dark:hover:bg-gray-800 p-2 rounded transition-colors">
+                                <input type="checkbox" name="allowed_majors[]" value="{{ $major->id }}"
+                                    class="w-4 h-4 text-gray-900 dark:text-gray-100 bg-gray-100 border-gray-300 rounded focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 dark:bg-gray-600 dark:border-gray-500" />
+                                <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">
+                                    {{ $major->name }} <span class="text-gray-400">({{ $major->code }})</span>
+                                </span>
+                            </label>
+                        @empty
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Belum ada jurusan</p>
+                        @endforelse
+                    </div>
+                </div>
+
+                <div>
                     <label for="description"
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         Deskripsi <span class="text-gray-400 text-xs">(Opsional)</span>
@@ -269,98 +282,6 @@
         </form>
     </x-modal>
 
-    <!-- Manage Majors Modal -->
-    <x-modal name="majorsModal" :show="false" focusable>
-        <form id="majorsForm" method="POST" action="#" class="p-6">
-            @csrf
-            @method('PUT')
-
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                Kelola Jurusan
-            </h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                <span id="majorsModalSubjectName" class="font-medium text-gray-700 dark:text-gray-300"></span>
-            </p>
-
-            <div class="mb-6">
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    Pilih jurusan yang mempelajari mata pelajaran ini
-                </p>
-                <div
-                    class="max-h-80 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3 bg-gray-50 dark:bg-gray-900/50">
-                    @foreach ($majors as $major)
-                        <label
-                            class="flex items-center p-3 rounded-lg hover:bg-white dark:hover:bg-gray-800 cursor-pointer transition-colors duration-200">
-                            <input id="major_chk_{{ $major->id }}" name="majors[]" value="{{ $major->id }}"
-                                type="checkbox"
-                                class="w-4 h-4 text-gray-900 dark:text-gray-100 bg-gray-100 border-gray-300 rounded focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 dark:bg-gray-700 dark:border-gray-600">
-                            <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">
-                                {{ $major->name }} <span class="text-gray-400">({{ $major->code }})</span>
-                            </span>
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-
-            <div class="flex justify-end gap-3">
-                <button type="button" x-on:click="$dispatch('close')"
-                    class="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                    Batal
-                </button>
-                <button type="submit"
-                    class="px-4 py-2.5 text-sm font-medium text-white dark:text-gray-900 bg-gray-900 dark:bg-gray-100 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200">
-                    Simpan Perubahan
-                </button>
-            </div>
-        </form>
-    </x-modal>
-
-    <!-- Manage Teachers Modal -->
-    <x-modal name="teachersModal" :show="false" focusable>
-        <form id="teachersForm" method="POST" action="#" class="p-6">
-            @csrf
-            @method('PUT')
-
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                Kelola Guru
-            </h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                <span id="teachersModalSubjectName" class="font-medium text-gray-700 dark:text-gray-300"></span>
-            </p>
-
-            <div class="mb-6">
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    Pilih guru yang mengampu mata pelajaran ini
-                </p>
-                <div
-                    class="max-h-80 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3 bg-gray-50 dark:bg-gray-900/50">
-                    @foreach ($teachers as $teacher)
-                        <label
-                            class="flex items-center p-3 rounded-lg hover:bg-white dark:hover:bg-gray-800 cursor-pointer transition-colors duration-200">
-                            <input id="teacher_chk_{{ $teacher->id }}" name="teachers[]"
-                                value="{{ $teacher->id }}" type="checkbox"
-                                class="w-4 h-4 text-gray-900 dark:text-gray-100 bg-gray-100 border-gray-300 rounded focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 dark:bg-gray-700 dark:border-gray-600">
-                            <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">
-                                {{ $teacher->user->name }}
-                            </span>
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-
-            <div class="flex justify-end gap-3">
-                <button type="button" x-on:click="$dispatch('close')"
-                    class="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                    Batal
-                </button>
-                <button type="submit"
-                    class="px-4 py-2.5 text-sm font-medium text-white dark:text-gray-900 bg-gray-900 dark:bg-gray-100 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200">
-                    Simpan Perubahan
-                </button>
-            </div>
-        </form>
-    </x-modal>
-
     <!-- Delete Form -->
     <form id="deleteSubjectForm" method="POST" action="" class="hidden">
         @csrf
@@ -377,17 +298,31 @@
             const typeInput = document.getElementById('type');
             const descInput = document.getElementById('description');
 
+            // Reset all allowed_majors checkboxes
+            document.querySelectorAll('input[name="allowed_majors[]"]').forEach(el => el.checked = false);
+
             if (subject) {
                 modalTitle.innerText = 'Edit Mata Pelajaran';
-                form.action = `/staff/subjects/${subject.id}`;
+                form.action = `/admin/subjects/${subject.id}`;
                 methodInput.value = 'PUT';
-                codeInput.value = subject.code;
-                nameInput.value = subject.name;
+                codeInput.value = subject.code || '';
+                nameInput.value = subject.name || '';
                 typeInput.value = subject.type || '';
                 descInput.value = subject.description || '';
+
+                // Support multiple JSON shapes: allowedMajors (camelCase) or allowed_majors (snake_case)
+                const allowedList = subject.allowedMajors || subject.allowed_majors || [];
+                allowedList.forEach(allowed => {
+                    // allowed may include major_id or nested major object
+                    const majorId = allowed.major_id ?? (allowed.major && allowed.major.id) ?? allowed.id ?? null;
+                    if (majorId) {
+                        const checkbox = document.querySelector(`input[name="allowed_majors[]"][value="${majorId}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    }
+                });
             } else {
                 modalTitle.innerText = 'Tambah Mata Pelajaran';
-                form.action = "{{ route('staff.subjects.store') }}";
+                form.action = "{{ route('admin.subjects.store') }}";
                 methodInput.value = 'POST';
                 codeInput.value = '';
                 nameInput.value = '';
@@ -400,48 +335,11 @@
             }));
         }
 
-        function openMajorsModal(subject) {
-            document.getElementById('majorsModalSubjectName').innerText = subject.name;
-            const form = document.getElementById('majorsForm');
-            form.action = `/staff/subjects/${subject.id}/majors`;
-
-            document.querySelectorAll('input[name="majors[]"]').forEach(el => el.checked = false);
-
-            if (subject.majors) {
-                subject.majors.forEach(major => {
-                    const checkbox = document.getElementById(`major_chk_${major.id}`);
-                    if (checkbox) checkbox.checked = true;
-                });
-            }
-
-            window.dispatchEvent(new CustomEvent('open-modal', {
-                detail: 'majorsModal'
-            }));
-        }
-
-        function openTeachersModal(subject) {
-            document.getElementById('teachersModalSubjectName').innerText = subject.name;
-            const form = document.getElementById('teachersForm');
-            form.action = `/staff/subjects/${subject.id}/teachers`;
-
-            document.querySelectorAll('input[name="teachers[]"]').forEach(el => el.checked = false);
-
-            if (subject.teachers) {
-                subject.teachers.forEach(teacher => {
-                    const checkbox = document.getElementById(`teacher_chk_${teacher.id}`);
-                    if (checkbox) checkbox.checked = true;
-                });
-            }
-
-            window.dispatchEvent(new CustomEvent('open-modal', {
-                detail: 'teachersModal'
-            }));
-        }
-
         function deleteSubject(id) {
+            if (!id) return;
             if (confirm('Apakah Anda yakin ingin menghapus mata pelajaran ini? Tindakan ini tidak dapat dibatalkan.')) {
                 const form = document.getElementById('deleteSubjectForm');
-                form.action = `/staff/subjects/${id}`;
+                form.action = `/admin/subjects/${id}`;
                 form.submit();
             }
         }

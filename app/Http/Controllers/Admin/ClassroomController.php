@@ -23,7 +23,7 @@ class ClassroomController extends Controller
                 ->orderBy('rombel', 'asc');
         }])->get();
 
-        return view('staff.classroom.index', [
+        return view('admin.classroom.index', [
             'title' => 'Kelas',
             'description' => 'Halaman kelas',
             'majors' => $majors,
@@ -45,13 +45,13 @@ class ClassroomController extends Controller
             ->exists();
 
         if ($exists) {
-            return redirect()->route('staff.classrooms.index')
+            return redirect()->route('admin.classrooms.index')
                 ->with('error', 'Kelas sudah ada untuk jurusan, level, dan rombel ini.');
         }
 
         Classroom::create($validated);
 
-        return redirect()->route('staff.classrooms.index')
+        return redirect()->route('admin.classrooms.index')
             ->with('success', 'Kelas berhasil ditambahkan.');
     }
 
@@ -99,11 +99,12 @@ class ClassroomController extends Controller
                 ->get();
         }
 
-        return view('staff.classroom.show', [
+        return view('admin.classroom.show', [
             'title' => 'Detail Kelas',
             'description' => 'Detail informasi kelas',
             'classroom' => $classroom,
             'guardian' => $guardian,
+            'activeTerm' => $activeTerm,
             'students' => $students,
             'teachers' => $teachers,
             'availableStudents' => $availableStudents,
@@ -132,13 +133,13 @@ class ClassroomController extends Controller
             ->exists();
 
         if ($exists) {
-            return redirect()->route('staff.classrooms.index')
+            return redirect()->route('admin.classrooms.index')
                 ->with('error', 'Kelas sudah ada untuk jurusan, level, dan rombel ini.');
         }
 
         $classroom->update($validated);
 
-        return redirect()->route('staff.classrooms.index')
+        return redirect()->route('admin.classrooms.index')
             ->with('success', 'Kelas berhasil diperbarui.');
     }
 
@@ -147,7 +148,7 @@ class ClassroomController extends Controller
         $classroom = Classroom::findOrFail($id);
         $classroom->delete();
 
-        return redirect()->route('staff.classrooms.index')
+        return redirect()->route('admin.classrooms.index')
             ->with('success', 'Kelas berhasil dihapus.');
     }
 }

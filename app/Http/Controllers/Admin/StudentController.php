@@ -22,7 +22,7 @@ class StudentController extends Controller
         $majors = Major::orderBy('name')->get();
         $classrooms = Classroom::with('major')->get()->sortBy('full_name');
 
-        return view('staff.student.index', [
+        return view('admin.student.index', [
             'title' => 'Siswa',
             'description' => 'Halaman siswa',
             'majors' => $majors,

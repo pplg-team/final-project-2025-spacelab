@@ -48,7 +48,7 @@
                     </div>
                     <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Total Kelas</h4>
                     <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($totalClasses ?? 0) }}</p>
-                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">Dari 12 jurusan</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">Dari {{ $totalMajors ?? 0 }} jurusan</p>
                 </div>
 
                 <!-- Total Ruangan -->

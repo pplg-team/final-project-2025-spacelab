@@ -14,7 +14,7 @@ class TermController extends Controller
     public function index()
     {
         $terms = Term::with('blocks')->orderBy('start_date', 'desc')->get();
-        return view('staff.term.index', [
+        return view('admin.term.index', [
             'terms' => $terms,
             'title' => 'Tahun Ajaran',
             'description' => 'Halaman tahun ajaran',
@@ -54,7 +54,7 @@ class TermController extends Controller
 
             Term::create($validated);
 
-            return redirect()->route('staff.terms.index')->with('success', 'Tahun ajaran berhasil ditambahkan');
+            return redirect()->route('admin.terms.index')->with('success', 'Tahun ajaran berhasil ditambahkan');
         } catch (ValidationException $e) {
             return response()->json([
                 'status' => 'error',
@@ -112,7 +112,7 @@ class TermController extends Controller
 
             $term->update($validated);
 
-            return redirect()->route('staff.terms.index')->with('success', 'Tahun ajaran berhasil diperbarui');
+            return redirect()->route('admin.terms.index')->with('success', 'Tahun ajaran berhasil diperbarui');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->back()->withErrors($e->validator)->withInput();
         } catch (\Exception $e) {
@@ -124,7 +124,7 @@ class TermController extends Controller
     {
         try {
             $term->delete();
-            return redirect()->route('staff.terms.index')->with('success', 'Tahun ajaran berhasil dihapus');
+            return redirect()->route('admin.terms.index')->with('success', 'Tahun ajaran berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus tahun ajaran: ' . $e->getMessage());
         }

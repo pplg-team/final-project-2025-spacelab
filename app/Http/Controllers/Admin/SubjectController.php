@@ -15,7 +15,7 @@ class SubjectController extends Controller
     public function index(Request $request)
     {
         $subjects = Subject::query()
-            ->with(['majors', 'teachers.user'])
+            ->with(['allowedMajors.major', 'teachers.user'])
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
                     ->orWhere('code', 'like', "%{$search}%");
@@ -29,7 +29,7 @@ class SubjectController extends Controller
             return $teacher->user->name;
         });
 
-        return view('staff.subjects.index', compact('subjects', 'majors', 'teachers'));
+        return view('admin.subjects.index', compact('subjects', 'majors', 'teachers'));
     }
 
     public function fetch(Request $request)
@@ -52,11 +52,24 @@ class SubjectController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:teori,praktikum,lainnya',
             'description' => 'nullable|string',
+            'allowed_majors' => 'array',
+            'allowed_majors.*' => 'exists:majors,id',
         ]);
 
-        Subject::create($validated);
+        $allowedMajors = $validated['allowed_majors'] ?? [];
+        unset($validated['allowed_majors']);
 
-        return redirect()->back()->with('success', 'Subject created successfully.');
+        $subject = Subject::create($validated);
+
+        // Create allowed major records
+        foreach ($allowedMajors as $majorId) {
+            $subject->allowedMajors()->create([
+                'major_id' => $majorId,
+                'is_allowed' => true,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Pelajaran berhasil ditambahkan.');
     }
 
     public function update(Request $request, Subject $subject)
@@ -66,17 +79,31 @@ class SubjectController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:teori,praktikum,lainnya',
             'description' => 'nullable|string',
+            'allowed_majors' => 'array',
+            'allowed_majors.*' => 'exists:majors,id',
         ]);
+
+        $allowedMajors = $validated['allowed_majors'] ?? [];
+        unset($validated['allowed_majors']);
 
         $subject->update($validated);
 
-        return redirect()->back()->with('success', 'Subject updated successfully.');
+        // Update allowed major records
+        $subject->allowedMajors()->delete();
+        foreach ($allowedMajors as $majorId) {
+            $subject->allowedMajors()->create([
+                'major_id' => $majorId,
+                'is_allowed' => true,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Pelajaran berhasil diperbarui.');
     }
 
     public function destroy(Subject $subject)
     {
         $subject->delete();
-        return redirect()->back()->with('success', 'Subject deleted successfully.');
+        return redirect()->back()->with('success', 'Pelajaran berhasil dihapus.');
     }
 
     public function updateMajors(Request $request, Subject $subject)
@@ -86,23 +113,20 @@ class SubjectController extends Controller
             'majors.*' => 'exists:majors,id',
         ]);
 
-        // Sync with Pivot notes? For now just sync IDs.
-        // If we want to preserve notes, we'd need a more complex UI.
-        // Assuming simple toggling for now.
-        $subject->majors()->sync($request->majors ?? []);
+        // Update subject_major_allowed
+        $subject->allowedMajors()->delete();
+        foreach ($request->majors ?? [] as $majorId) {
+            $subject->allowedMajors()->create([
+                'major_id' => $majorId,
+                'is_allowed' => true,
+            ]);
+        }
 
-        return redirect()->back()->with('success', 'Subject majors updated successfully.');
+        return redirect()->back()->with('success', 'Jurusan pelajaran berhasil diperbarui.');
     }
 
     public function updateTeachers(Request $request, Subject $subject)
     {
-        // This is a bit more complex because teacher_subjects table has started_at and ended_at,
-        // and it's not a standard pivot table in the content of "sync" if we want to keep history.
-        // However, usually "sync" is used for "currently active".
-        // Let's check TeacherSubject model. It has start/end dates.
-        // For simplicity in this iteration, we will just managing "assignments".
-        // Use sync for simplicity, or customized logic if we want to track history.
-        // Based on the user request "CRUD lengkap", simple assignment (sync) is a good start.
 
         $validated = $request->validate([
             'teachers' => 'array',
@@ -111,6 +135,6 @@ class SubjectController extends Controller
 
         $subject->teachers()->sync($request->teachers ?? []);
 
-        return redirect()->back()->with('success', 'Subject teachers updated successfully.');
+        return redirect()->back()->with('success', 'Guru pelajaran berhasil diperbarui.');
     }
 }

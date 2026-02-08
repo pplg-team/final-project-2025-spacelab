@@ -202,7 +202,7 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('staff.students.store') }}" enctype="multipart/form-data"
+            <form method="POST" action="{{ route('admin.students.store') }}" enctype="multipart/form-data"
                 class="space-y-4">
                 @csrf
 
@@ -300,14 +300,14 @@
             </p>
 
             <div class="mb-4">
-                <a href="{{ route('staff.students.template') }}" target="_blank"
+                <a href="{{ route('admin.students.template') }}" target="_blank"
                     class="inline-flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                     <x-heroicon-o-arrow-down-tray class="w-4 h-4 mr-2" />
                     Download Template
                 </a>
             </div>
 
-            <form method="POST" action="{{ route('staff.students.import') }}" enctype="multipart/form-data"
+            <form method="POST" action="{{ route('admin.students.import') }}" enctype="multipart/form-data"
                 class="space-y-4">
                 @csrf
 
@@ -509,8 +509,8 @@
                             return ['id' => $class->id, 'name' => $class->full_name];
                         })->sortBy('name')->values();
                 })),
-            fetchUrl: '{{ route('staff.students.fetch') }}'
+            fetchUrl: '{{ route('admin.students.fetch') }}'
         };
     </script>
-    @vite(['resources/js/staff/student-index.js'])
+    @vite(['resources/js/admin/student-index.js'])
 </x-app-layout>

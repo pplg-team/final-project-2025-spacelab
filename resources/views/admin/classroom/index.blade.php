@@ -139,7 +139,7 @@
                                                                 </p>
                                                             </div>
                                                             <div class="flex space-x-1">
-                                                                <a href="{{ route('staff.classrooms.show', $classroom->id) }}"
+                                                                <a href="{{ route('admin.classrooms.show', $classroom->id) }}"
                                                                     class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
                                                                     <x-heroicon-o-eye class="w-4 h-4" />
                                                                 </a>
@@ -183,7 +183,7 @@
 
     <!-- Classroom Modal -->
     <x-modal name="classroomModal" :show="false" focusable>
-        <form id="classroomForm" method="POST" action="{{ route('staff.classrooms.store') }}">
+        <form id="classroomForm" method="POST" action="{{ route('admin.classrooms.store') }}">
             @csrf
             <input type="hidden" name="_method" id="classroomMethod" value="POST">
             <input type="hidden" name="classroom_id" id="classroomId">
@@ -267,14 +267,14 @@
             </p>
 
             <div class="mb-4">
-                <a href="{{ route('staff.classrooms.template') }}" target="_blank" id="importTemplateLink"
+                <a href="{{ route('admin.classrooms.template') }}" target="_blank" id="importTemplateLink"
                     class="inline-flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                     <x-heroicon-o-arrow-down-tray class="w-4 h-4 mr-2" />
                     Download Template
                 </a>
             </div>
 
-            <form method="POST" action="{{ route('staff.classrooms.import') }}" enctype="multipart/form-data"
+            <form method="POST" action="{{ route('admin.classrooms.import') }}" enctype="multipart/form-data"
                 class="space-y-4">
                 @csrf
 
@@ -304,9 +304,9 @@
     <script>
         // Configure routes for JavaScript
         window.classroomRoutes = {
-            base: '/staff/classroomsjson',
-            store: '{{ route('staff.classrooms.store') }}',
-            delete: '/staff/classrooms'
+            base: '/admin/classroomsjson',
+            store: '{{ route('admin.classrooms.store') }}',
+            delete: '/admin/classrooms'
         };
         window.csrfToken = '@csrf';
     </script>

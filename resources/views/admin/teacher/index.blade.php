@@ -263,7 +263,7 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('staff.teachers.store') }}" enctype="multipart/form-data"
+            <form method="POST" action="{{ route('admin.teachers.store') }}" enctype="multipart/form-data"
                 class="space-y-4">
                 @csrf
 
@@ -347,14 +347,14 @@
             </p>
 
             <div class="mb-4">
-                <a href="{{ route('staff.teachers.template') }}" target="_blank"
+                <a href="{{ route('admin.teachers.template') }}" target="_blank"
                     class="inline-flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                     <x-heroicon-o-arrow-down-tray class="w-4 h-4 mr-2" />
                     Download Template
                 </a>
             </div>
 
-            <form method="POST" action="{{ route('staff.teachers.import') }}" enctype="multipart/form-data"
+            <form method="POST" action="{{ route('admin.teachers.import') }}" enctype="multipart/form-data"
                 class="space-y-4">
                 @csrf
 
@@ -511,5 +511,5 @@
         </div>
     </x-modal>
 
-    @vite(['resources/js/staff/teacher-index.js'])
+    @vite(['resources/js/admin/teacher-index.js'])
 </x-app-layout>

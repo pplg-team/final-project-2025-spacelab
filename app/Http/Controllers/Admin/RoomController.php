@@ -22,7 +22,7 @@ class RoomController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('staff.room.index', [
+        return view('admin.room.index', [
             'title' => 'Gedung & Ruangan',
             'description' => 'Kelola data gedung dan ruangan',
             'buildings' => $buildings,
@@ -50,7 +50,7 @@ class RoomController extends Controller
 
         Room::create($validated);
 
-        return redirect()->route('staff.rooms.index')
+        return redirect()->route('admin.rooms.index')
             ->with('success', 'Ruangan berhasil ditambahkan.');
     }
 
@@ -95,7 +95,7 @@ class RoomController extends Controller
 
         $room->update($validated);
 
-        return redirect()->route('staff.rooms.index')
+        return redirect()->route('admin.rooms.index')
             ->with('success', 'Ruangan berhasil diperbarui.');
     }
 
@@ -106,13 +106,13 @@ class RoomController extends Controller
     {
         // Check if room is being used in timetable
         if ($room->directTimetableEntries()->exists()) {
-            return redirect()->route('staff.rooms.index')
+            return redirect()->route('admin.rooms.index')
                 ->with('error', 'Ruangan tidak dapat dihapus karena sedang digunakan dalam jadwal.');
         }
 
         $room->delete();
 
-        return redirect()->route('staff.rooms.index')
+        return redirect()->route('admin.rooms.index')
             ->with('success', 'Ruangan berhasil dihapus.');
     }
 }

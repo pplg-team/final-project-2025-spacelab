@@ -25,7 +25,7 @@ window.editMajor = function (major) {
     const title = document.getElementById('modalTitle');
 
     if (title) title.textContent = 'Edit Jurusan';
-    form.action = `/staff/majors/${major.id}`;
+    form.action = `/${window.location.pathname.split('/')[1]}/majors/${major.id}`;
     document.getElementById('formMethod').value = 'PUT';
 
     document.getElementById('code').value = major.code;

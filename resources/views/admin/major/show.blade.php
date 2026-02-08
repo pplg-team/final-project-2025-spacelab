@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
     <div>
-        <a href="{{ redirect()->back()->getTargetUrl() }}"
+        <a href="{{ route('admin.majors.index') }}"
             class="inline-flex items-center gap-2 px-4 py-2 rounded-xl
                 bg-gradient-to-r from-gray-800 to-gray-700
                 dark:from-gray-700 dark:to-gray-600
@@ -85,21 +85,30 @@
                     </div>
 
                     <!-- Action Button -->
-                    <div class="mt-4 sm:mt-0">
+                    <div>
+                        <div class="mb-4">
+                            <p>
+                                <span
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600">
+
+                                    {{ $activeTerm
+                                        ? 'Semester ' . ucfirst($activeTerm->kind) . ' Tahun Ajaran ' . $activeTerm->tahun_ajaran
+                                        : 'Tahun Ajaran Tidak Diketahui'
+                                    }}
+
+                                </span>
+                            </p>
+                        </div>
                         <button x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-major-modal')"
-                            class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-700 border border-transparent rounded-lg font-medium text-sm text-white hover:bg-gray-700 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-150 shadow-sm">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                </path>
-                            </svg>
-                            Edit Profile
+                            class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-700 border border-transparent rounded-lg font-medium text-sm text-white hover:bg-gray-700 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-150 shadow-sm mt-5">
+                            <x-heroicon-o-pencil class="w-5 h-5 mr-3" />
+                            Edit Profil
                         </button>
                     </div>
                 </div>
                 <div class="mt-6">
                     <p class="mt-6 text-gray-600 dark:text-gray-300 text-justify">
-                        {{ $major?->description ?? 'Detail jurusan belum diset.' }}
+                        {{ $major?->description ?? 'Detail jurusan belum di atur.' }}
                     </p>
                 </div>
             </div>
@@ -228,7 +237,7 @@
                                                     {{ $class->students_count ?? 0 }}</div>
                                             </div>
                                             <div class="flex-shrink-0 text-xs text-gray-400">
-                                                <a href="{{ route('staff.classrooms.show', $class->id) }}">Lihat Detail</a>
+                                                <a href="{{ route('admin.classrooms.show', $class->id) }}">Lihat Detail</a>
                                             </div>
                                         </li>
                                     @endforeach
@@ -320,7 +329,7 @@
                                     </p>
                                     <h3
                                         class="text-sm md:text-2xl font-extrabold text-gray-900 dark:text-white truncate">
-                                        {{ $assignment?->head?->user?->name ?? 'Belum diset' }}
+                                        {{ $assignment?->head?->user?->name ?? 'Belum di atur' }}
                                     </h3>
                                 </div>
                                 <div class="flex items-center gap-2">
@@ -349,7 +358,7 @@
                                     </p>
                                     <h3
                                         class="text-sm md:text-2xl font-extrabold text-gray-900 dark:text-white truncate">
-                                        {{ $assignment?->programCoordinator?->user?->name ?? 'Belum diset' }}
+                                        {{ $assignment?->programCoordinator?->user?->name ?? 'Belum di atur' }}
                                     </h3>
                                 </div>
                                 <div class="flex items-center gap-2">
@@ -485,7 +494,7 @@
                                         <!-- Edit Company Modal for this relation -->
                                         <x-modal name="edit-company-modal-{{ $rel->id }}" focusable>
                                             <form method="post"
-                                                action="{{ route('staff.majors.company-relation.update', [$major->id, $rel->id]) }}"
+                                                action="{{ route('admin.majors.company-relation.update', [$major->id, $rel->id]) }}"
                                                 class="p-6">
                                                 @csrf
                                                 @method('PUT')
@@ -598,7 +607,7 @@
                                         <!-- Delete Company Modal for this relation -->
                                         <x-modal name="delete-company-modal-{{ $rel->id }}" focusable>
                                             <form method="post"
-                                                action="{{ route('staff.majors.company-relation.destroy', [$major->id, $rel->id]) }}"
+                                                action="{{ route('admin.majors.company-relation.destroy', [$major->id, $rel->id]) }}"
                                                 class="p-6">
                                                 @csrf
                                                 @method('DELETE')
@@ -666,7 +675,7 @@
     </div>
 
     <x-modal name="edit-major-modal" focusable>
-        <form method="post" action="{{ route('staff.majors.update', $major->id) }}" class="p-6"
+        <form method="post" action="{{ route('admin.majors.update', $major->id) }}" class="p-6"
             enctype="multipart/form-data">
             @csrf
             @method('PUT')
@@ -754,7 +763,7 @@
 
     <!-- Add Company Modal -->
     <x-modal name="add-company-modal" focusable>
-        <form method="post" action="{{ route('staff.majors.company-relation.store', $major->id) }}"
+        <form method="post" action="{{ route('admin.majors.company-relation.store', $major->id) }}"
             class="p-6">
             @csrf
 
@@ -839,7 +848,7 @@
 
     <!-- Role Assignment Modal -->
     <x-modal name="role-assignment-modal" focusable>
-        <form method="post" action="{{ route('staff.majors.role-assignment.update', $major->id) }}"
+        <form method="post" action="{{ route('admin.majors.role-assignment.update', $major->id) }}"
             class="p-6">
             @csrf
             @method('PUT')
