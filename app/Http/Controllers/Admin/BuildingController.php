@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Building;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class BuildingController extends Controller
@@ -22,6 +24,18 @@ class BuildingController extends Controller
         ]);
 
         Building::create($validated);
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'entity' => 'pengguna (' . Auth::user()->name . ')',
+            'record_id' => Auth::id(),
+            'action' => 'create_building',
+            'new_data' => [
+                'message' => 'Pengguna ' . Auth::user()->name . ' membuat gedung baru pada ' . now()->toDateTimeString(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ],
+        ]);
 
         return redirect()->route('admin.rooms.index')
             ->with('success', 'Gedung berhasil ditambahkan.');
@@ -56,6 +70,18 @@ class BuildingController extends Controller
 
         $building->update($validated);
 
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'entity' => 'pengguna (' . Auth::user()->name . ')',
+            'record_id' => $building->id,
+            'action' => 'update_building',
+            'new_data' => [
+                'message' => 'Pengguna ' . Auth::user()->name . ' memperbarui gedung pada ' . now()->toDateTimeString(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ],
+        ]);
+
         return redirect()->route('admin.rooms.index')
             ->with('success', 'Gedung berhasil diperbarui.');
     }
@@ -63,7 +89,7 @@ class BuildingController extends Controller
     /**
      * Remove the specified building.
      */
-    public function destroy(Building $building)
+    public function destroy(Request $request, Building $building)
     {
         // Check if building has rooms
         if ($building->rooms()->exists()) {
@@ -72,6 +98,18 @@ class BuildingController extends Controller
         }
 
         $building->delete();
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'entity' => 'pengguna (' . Auth::user()->name . ')',
+            'record_id' => $building->id,
+            'action' => 'delete_building',
+            'new_data' => [
+                'message' => 'Pengguna ' . Auth::user()->name . ' menghapus gedung pada ' . now()->toDateTimeString(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ],
+        ]);
 
         return redirect()->route('admin.rooms.index')
             ->with('success', 'Gedung berhasil dihapus.');

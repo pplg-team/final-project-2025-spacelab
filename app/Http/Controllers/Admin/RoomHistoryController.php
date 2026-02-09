@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use App\Models\Room;
 use App\Models\RoomHistory;
@@ -83,6 +84,18 @@ class RoomHistoryController extends Controller
 
         RoomHistory::create($validated);
 
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'entity' => 'riwayat ruangan (' . $validated['room_id'] . ')',
+            'record_id' => RoomHistory::where('room_id', $validated['room_id'])->latest()->first()->id,
+            'action' => 'create_room_history',
+            'new_data' => [
+                'message' => 'Pengguna ' . Auth::user()->name . ' menambahkan riwayat ruangan pada ' . now()->toDateTimeString(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ],
+        ]);
+
         return redirect()->back()->with('success', 'Room history created successfully.');
     }
 
@@ -108,6 +121,18 @@ class RoomHistoryController extends Controller
         }
 
         $history->update($validated);
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'entity' => 'riwayat ruangan (' . $history->room_id . ')',
+            'record_id' => $history->id,
+            'action' => 'update_room_history',
+            'new_data' => [
+                'message' => 'Pengguna ' . Auth::user()->name . ' memperbarui riwayat ruangan pada ' . now()->toDateTimeString(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ],
+        ]);
 
         return redirect()->back()->with('success', 'Room history updated successfully.');
     }

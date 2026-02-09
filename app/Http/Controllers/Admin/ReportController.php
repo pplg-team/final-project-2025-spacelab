@@ -246,7 +246,7 @@ class ReportController extends Controller
 
             $roomUsage[$room->id] = [
                 'count' => $usage,
-                'percentage' => min(100, round(($usage / 30) * 100)) // Assuming max 30 slots per week
+                'percentage' => min(100, round(($usage / 30) * 100)) 
             ];
         }
 

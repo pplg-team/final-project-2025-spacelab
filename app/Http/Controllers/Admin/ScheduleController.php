@@ -12,8 +12,6 @@ class ScheduleController extends Controller
 
         $activeTerm = Term::where('is_active', true)->first();
 
-
-
         return view('admin.schedules.index', [
             'activeTerm' => $activeTerm,
             'title' => 'Jadwal',

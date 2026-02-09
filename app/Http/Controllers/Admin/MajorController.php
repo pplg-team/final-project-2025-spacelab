@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\ClassHistory;
 use App\Models\Major;
 use App\Models\RoleAssignment;
@@ -12,6 +13,7 @@ use App\Models\Company;
 use App\Models\CompanyRelation;
 use App\Models\Term;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -190,6 +192,18 @@ class MajorController extends Controller
 
         Major::create($validated);
 
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'entity' => 'pengguna (' . Auth::user()->name . ')',
+            'record_id' => $validated['code'],
+            'action' => 'create_major',
+            'new_data' => [
+                'message' => 'Pengguna ' . Auth::user()->name . ' membuat jurusan baru pada ' . now()->toDateTimeString(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ],
+        ]);
+
         return redirect()->route('admin.majors.index')
             ->with('success', 'Jurusan berhasil ditambahkan');
     }
@@ -230,6 +244,18 @@ class MajorController extends Controller
 
         $major->update($validated);
 
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'entity' => 'jurusan (' . $major->name . ')',
+            'record_id' => $major->id,
+            'action' => 'update_major',
+            'new_data' => [
+                'message' => 'Pengguna ' . Auth::user()->name . ' memperbarui jurusan pada ' . now()->toDateTimeString(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ],
+        ]);
+
         return redirect()->back()
             ->with('success', 'Jurusan berhasil diperbarui');
     }
@@ -239,7 +265,7 @@ class MajorController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Major $major)
+    public function destroy(Request $request, Major $major)
     {
         // Check if major has classes
         if ($major->classes()->count() > 0) {
@@ -253,6 +279,19 @@ class MajorController extends Controller
         }
 
         $major->delete();
+
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'entity' => 'jurusan (' . $major->name . ')',
+            'record_id' => $major->id,
+            'action' => 'delete_major',
+            'new_data' => [
+                'message' => 'Pengguna ' . Auth::user()->name . ' menghapus jurusan pada ' . now()->toDateTimeString(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ],
+        ]);
 
         return redirect()->route('admin.majors.index')
             ->with('success', 'Jurusan berhasil dihapus');

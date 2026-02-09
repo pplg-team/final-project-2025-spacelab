@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Building;
 use App\Models\Room;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class RoomController extends Controller
@@ -49,6 +51,18 @@ class RoomController extends Controller
         $validated['is_active'] = $request->boolean('is_active', true);
 
         Room::create($validated);
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'entity' => 'ruangan (' . $validated['name'] . ')',
+            'record_id' => Room::where('code', $validated['code'])->first()->id,
+            'action' => 'create_room',
+            'new_data' => [
+                'message' => 'Pengguna ' . Auth::user()->name . ' menambahkan ruangan baru pada ' . now()->toDateTimeString(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ],
+        ]);
 
         return redirect()->route('admin.rooms.index')
             ->with('success', 'Ruangan berhasil ditambahkan.');
@@ -95,6 +109,18 @@ class RoomController extends Controller
 
         $room->update($validated);
 
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'entity' => 'ruangan (' . $room->name . ')',
+            'record_id' => $room->id,
+            'action' => 'update_room',
+            'new_data' => [
+                'message' => 'Pengguna ' . Auth::user()->name . ' memperbarui data ruangan pada ' . now()->toDateTimeString(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ],
+        ]);
+
         return redirect()->route('admin.rooms.index')
             ->with('success', 'Ruangan berhasil diperbarui.');
     }
@@ -102,7 +128,7 @@ class RoomController extends Controller
     /**
      * Remove the specified room.
      */
-    public function destroy(Room $room)
+    public function destroy(Request $request, Room $room)
     {
         // Check if room is being used in timetable
         if ($room->directTimetableEntries()->exists()) {
@@ -111,6 +137,18 @@ class RoomController extends Controller
         }
 
         $room->delete();
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'entity' => 'ruangan (' . $room->name . ')',
+            'record_id' => $room->id,
+            'action' => 'delete_room',
+            'new_data' => [
+                'message' => 'Pengguna ' . Auth::user()->name . ' menghapus ruangan pada ' . now()->toDateTimeString(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ],
+        ]);
 
         return redirect()->route('admin.rooms.index')
             ->with('success', 'Ruangan berhasil dihapus.');
