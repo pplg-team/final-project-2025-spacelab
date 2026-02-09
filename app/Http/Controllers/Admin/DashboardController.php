@@ -13,6 +13,7 @@ use App\Models\Room;
 use App\Models\Subject;
 use App\Models\AuditLog;
 use App\Models\Term;
+use App\Models\AttendanceSession;
 
 class DashboardController extends Controller
 {
@@ -115,6 +116,9 @@ class DashboardController extends Controller
         $termLabel = $activeTerm ? $activeTerm->tahun_ajaran : 'Tidak ada semester aktif';
         $termPeriod = $activeTerm ? 'Periode: ' . $activeTerm->start_date->format('M d, Y') . ' - ' . $activeTerm->end_date->format('M d, Y') : '';
 
+        // Absensi hari ini
+        $attendanceToday = AttendanceSession::where('start_time', '>=', Carbon::now()->format('Y-m-d'))->first();
+
         return view('admin.dashboard', [
             'todayEntries' => $todayEntries,
             'totalToday' => $totalToday,
@@ -127,6 +131,7 @@ class DashboardController extends Controller
             'activeTerm' => $activeTerm,
             'termLabel' => $termLabel,
             'termPeriod' => $termPeriod,
+            'attendanceToday' => $attendanceToday,
             'title' => 'Dashboard',
             'description' => 'Halaman dashboard',
         ]);

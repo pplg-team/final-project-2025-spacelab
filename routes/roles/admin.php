@@ -33,6 +33,7 @@ use App\Http\Controllers\Admin\SubjectController as AdminSubjectController;
 use App\Http\Controllers\Admin\TimetableTemplateController as AdminTimetableTemplateController;
 use App\Http\Controllers\Admin\TimetableEntryController as AdminTimetableEntryController;
 use App\Http\Controllers\Admin\StaffController as AdminStaffController;
+use App\Http\Controllers\Admin\AttendanceSessionController as AdminAttendanceSessionController;
 
 Route::middleware(['auth', 'role:Admin'])
     ->prefix('admin')
@@ -163,5 +164,10 @@ Route::middleware(['auth', 'role:Admin'])
         Route::put('/staff/{id}', [AdminStaffController::class, 'update'])->name('staff.update');
         Route::delete('/staff/{id}', [AdminStaffController::class, 'destroy'])->name('staff.destroy');
         Route::post('/staff/{id}/reset-password', [AdminStaffController::class, 'resetPassword'])->name('staff.reset-password');
+
+        // Attendance Sessions
+        Route::get('/attendance', [AdminAttendanceSessionController::class, 'index'])->name('attendance.index');
+        Route::post('/attendance', [AdminAttendanceSessionController::class, 'store'])->name('attendance.store');
+        Route::delete('/attendance/{session}', [AdminAttendanceSessionController::class, 'destroy'])->name('attendance.destroy');
     });
 

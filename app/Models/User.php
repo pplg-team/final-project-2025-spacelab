@@ -93,6 +93,16 @@ class User extends Authenticatable implements CanResetPasswordContract
         return $this->hasOne(Teacher::class, 'user_id');
     }
 
+    public function attendanceSessions()
+    {
+        return $this->hasMany(AttendanceSession::class, 'user_id');
+    }
+
+    public function attendanceRecords()
+    {
+        return $this->hasMany(AttendanceRecord::class);
+    }
+
 
     /**
      * Return the uppercase initials for the user's display name.

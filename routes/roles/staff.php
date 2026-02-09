@@ -33,6 +33,7 @@ use App\Http\Controllers\Staff\SubjectController as StaffSubjectController;
 use App\Http\Controllers\Staff\TimetableTemplateController as StaffTimetableTemplateController;
 use App\Http\Controllers\Staff\TimetableEntryController as StaffTimetableEntryController;
 use App\Http\Controllers\Staff\StaffController as StaffStaffController;
+use App\Http\Controllers\AttendanceController as StaffAttendanceController;
 
 Route::middleware(['auth', 'role:Staff'])
     ->prefix('staff')
@@ -155,5 +156,10 @@ Route::middleware(['auth', 'role:Staff'])
         Route::get('/reports/teachers/export', [StaffReportController::class, 'exportTeachers'])->name('reports.teachers.export');
         Route::get('/reports/schedules', [StaffReportController::class, 'schedules'])->name('reports.schedules');
         Route::get('/reports/rooms', [StaffReportController::class, 'rooms'])->name('reports.rooms');
+        Route::get('/reports/rooms', [StaffReportController::class, 'rooms'])->name('reports.rooms');
+
+        // Attendance
+        Route::get('/attendance', [StaffAttendanceController::class, 'index'])->name('attendance.index');
+        Route::post('/attendance', [StaffAttendanceController::class, 'store'])->name('attendance.store');
     });
 

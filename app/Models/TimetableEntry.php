@@ -45,6 +45,10 @@ class TimetableEntry extends Model
         return $this->belongsTo(Teacher::class, 'teacher_id');
     }
 
+    public function attendanceSessions()
+    {
+        return $this->hasMany(AttendanceSession::class);
+    }
 
 
 

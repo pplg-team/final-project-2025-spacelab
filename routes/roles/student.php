@@ -6,8 +6,9 @@ use App\Http\Controllers\Student\{
     DashboardController as StudentDashboardController,
     ScheduleController as StudentScheduleController,
     ProfileController as StudentProfileController,
-    RoomController as StudentRoomController
+    RoomController as StudentRoomController,
 };
+use App\Http\Controllers\AttendanceController;
 
 Route::middleware(['auth', 'role:Siswa'])
     ->prefix('student')
@@ -18,4 +19,9 @@ Route::middleware(['auth', 'role:Siswa'])
         Route::get('/rooms', [StudentRoomController::class, 'index'])->name('rooms.index');
         Route::get('/classes', [StudentClassroomController::class, 'index'])->name('classroom.index');
         Route::get('/profile', [StudentProfileController::class, 'index'])->name('profile.index');
+        Route::get('/profile', [StudentProfileController::class, 'index'])->name('profile.index');
+
+        // Attendance
+        Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+        Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
     });

@@ -59,13 +59,13 @@
         <div class="border-t border-slate-200 dark:border-slate-700 p-4 transition-all duration-200">
             <div class="flex items-center gap-3">
                     @php
-                        $user = auth()->user();
+                        $user = Auth::user();
 
                         $avatar = null;
 
-                        if ($user->role->lower_name === 'student') {
+                        if (Auth::user()->role->lower_name === 'siswa') {
                             $avatar = optional($user->student)->avatar;
-                        } elseif ($user->role->lower_name === 'teacher') {
+                        } elseif (Auth::user()->role->lower_name === 'guru') {
                             $avatar = optional($user->teacher)->avatar;
                         }
 
