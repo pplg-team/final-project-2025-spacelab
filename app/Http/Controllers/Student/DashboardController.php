@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\ClassHistory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Models\AttendanceSession;
+use App\Models\AttendanceRecord;
 use App\Models\TimetableEntry;
 use App\Models\Classroom;
 use App\Models\Period;
@@ -142,6 +144,17 @@ class DashboardController extends Controller
             $classroom = Classroom::with('major')->find($classIds->first());
             $studentClassFullName = $classroom?->full_name ?? ($classroom?->name ?? '-');
         }
+        // cek apakah ada sesi absen yang dibuka
+        $activeSession = AttendanceSession::where('is_active', true)->first();
+        $isAbsensiActive = $activeSession !== null;
+        $activeSessionToken = $activeSession?->token;
+
+        $attendanceRecord = null;
+        if ($isAbsensiActive) {
+            $attendanceRecord = AttendanceRecord::where('attendance_session_id', $activeSession->id)
+                ->where('user_id', $student->id)
+                ->first();
+        }
 
         return view('student.dashboard', [
             'student'        => $student,
@@ -153,6 +166,9 @@ class DashboardController extends Controller
             'studentClassFullName' => $studentClassFullName,
             'title' => 'Dashboard',
             'description' => 'Halaman dashboard',
+            'isAbsensiActive' => $isAbsensiActive,
+            'activeSessionToken' => $activeSessionToken,
+            'attendanceRecord' => $attendanceRecord,
         ]);
     }
 }

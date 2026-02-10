@@ -71,22 +71,41 @@ class AttendanceSessionController extends Controller
         $isAbsensiActive = $activeSessionsCount > 0;
         $activeSessionToken = $activeSessions->first()?->token;
 
+        // Cek apakah sudah ada session yang dibuat hari ini
+        $sessionTodayExists = AttendanceSession::whereDate('created_at', $today)->exists();
+
         // 4. Monitoring Table
         $query = AttendanceRecord::with(['user.role', 'attendanceSession.timetableEntry.template.class'])
             ->whereDate('scanned_at', $request->date ?? $today);
 
         // Filters
-        // ... (Filters remain same) ...
+        if ($request->filled('role')) {
+            $query->whereHas('user.role', fn($q) => $q->where('name', $request->role));
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('search')) {
+            $query->whereHas('user', fn($q) => $q->where('name', 'like', '%' . $request->search . '%'));
+        }
 
         $records = $query->latest()->paginate(20);
 
         return view('admin.attendance.sessions', compact(
-            'stats', 'counts', 'chartData', 'isAbsensiActive', 'activeSessionsCount', 'records', 'activeSessionToken'
+            'stats', 'counts', 'chartData', 'isAbsensiActive', 'activeSessionsCount', 'records', 'activeSessionToken', 'sessionTodayExists'
         ));
     }
 
     public function store(Request $request)
     {
+        // Cek apakah sudah ada session yang dibuat hari ini
+        $sessionTodayExists = AttendanceSession::whereDate('created_at', Carbon::today())->exists();
+        if ($sessionTodayExists) {
+            return redirect()->back()->with('error', 'Sesi absensi untuk hari ini sudah dibuat. Hanya dapat membuat 1 sesi per hari.');
+        }
+
         // "Buka Absensi" -> Open sessions for ALL timetable entries of TODAY
         $entries = TimetableEntry::where('day_of_week', Carbon::now()->dayOfWeekIso)
             ->get();

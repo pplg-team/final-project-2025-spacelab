@@ -18,4 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->withSchedule(function ($schedule) {
+        $schedule->command('app:mark-alpha-attendance')
+            ->everyMinute()
+            ->withoutOverlapping();
+    })
+    ->create();

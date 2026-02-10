@@ -13,6 +13,9 @@ use App\Models\Room;
 use App\Models\Subject;
 use App\Models\AuditLog;
 use App\Models\Term;
+use App\Models\AttendanceSession;
+use App\Models\AttendanceRecord;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -115,6 +118,18 @@ class DashboardController extends Controller
         $termLabel = $activeTerm ? $activeTerm->tahun_ajaran : 'Tidak ada semester aktif';
         $termPeriod = $activeTerm ? 'Periode: ' . $activeTerm->start_date->format('M d, Y') . ' - ' . $activeTerm->end_date->format('M d, Y') : '';
 
+        // Cek apakah ada session absensi aktif
+        $activeSessions = AttendanceSession::where('is_active', true)->exists();
+        $isAbsensiActive = $activeSessions;
+
+        // Cek attendance record staff hari ini
+        $attendanceRecord = null;
+        if ($isAbsensiActive) {
+            $attendanceRecord = AttendanceRecord::where('user_id', Auth::id())
+                ->whereDate('scanned_at', $today)
+                ->first();
+        }
+
         return view('staff.dashboard', [
             'todayEntries' => $todayEntries,
             'totalToday' => $totalToday,
@@ -127,6 +142,8 @@ class DashboardController extends Controller
             'activeTerm' => $activeTerm,
             'termLabel' => $termLabel,
             'termPeriod' => $termPeriod,
+            'isAbsensiActive' => $isAbsensiActive,
+            'attendanceRecord' => $attendanceRecord,
             'title' => 'Dashboard',
             'description' => 'Halaman dashboard',
         ]);

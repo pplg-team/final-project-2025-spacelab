@@ -85,7 +85,7 @@
             </div>
 
             <div class="mt-6 flex flex-col gap-3">
-                @if (!$isAbsensiActive)
+                @if (!$isAbsensiActive && !$sessionTodayExists)
                     <form action="{{ route('admin.attendance.store') }}" method="POST">
                         @csrf
                         {{-- Dummy ID, controller handles finding sessions --}}
@@ -95,7 +95,13 @@
                             BUKA ABSENSI HARI INI
                         </button>
                     </form>
-                @else
+                @elseif ($sessionTodayExists && !$isAbsensiActive)
+                    <button disabled
+                        class="w-full bg-gray-400 text-white py-3 rounded-lg font-bold cursor-not-allowed shadow-lg"
+                        title="Sesi absensi sudah dibuat hari ini">
+                        SESI ABSENSI SUDAH DIBUAT
+                    </button>
+                @elseif ($sessionTodayExists && $isAbsensiActive)
                     <div class="space-y-4">
                         <div
                             class="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg flex flex-col items-center border border-gray-100 dark:border-gray-700">

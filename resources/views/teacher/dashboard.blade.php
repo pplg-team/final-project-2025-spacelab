@@ -92,6 +92,32 @@
                         </div>
                     </div>
                 </article>
+
+                <!-- Card 5: Absensi Hari Ini -->
+                @if ($isAbsensiActive)
+                    <article role="article" aria-label="Absensi Hari Ini"
+                        class="bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 p-4 md:p-5 hover:shadow-md transition-all duration-150">
+                        <div class="flex items-center justify-between gap-4">
+                            <div class="min-w-0">
+                                <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mb-1">Absensi Hari Ini</p>
+                                @if ($attendanceRecord)
+                                    <h3 class="text-sm md:text-xl font-extrabold text-green-600 dark:text-green-400">Sudah Absen</h3>
+                                    <p class="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 mt-2">Status: {{ ucfirst($attendanceRecord->status ?? 'hadir') }}</p>
+                                @else
+                                    <h3 class="text-sm md:text-xl font-extrabold text-red-600 dark:text-red-400">Belum Absen</h3>
+                                    <a href="{{ route('guru.attendance.index') }}" class="text-xs text-blue-500 dark:text-blue-400 hover:underline">Absen Sekarang</a>
+                                @endif
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-800 p-2 md:p-3 rounded-lg flex items-center justify-center border border-gray-100 dark:border-gray-700">
+                                @if ($attendanceRecord)
+                                    <x-heroicon-o-check-circle class="w-5 h-5 md:w-6 md:h-6 text-green-500 dark:text-green-400" />
+                                @else
+                                    <x-heroicon-o-x-circle class="w-5 h-5 md:w-6 md:h-6 text-red-500 dark:text-red-400" />
+                                @endif
+                            </div>
+                        </div>
+                    </article>
+                @endif
             </div>
 
             <div

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Teacher;
 use App\Http\Controllers\Controller;
 use App\Models\TimetableEntry;
 use App\Models\Period;
+use App\Models\AttendanceSession;
+use App\Models\AttendanceRecord;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -138,6 +140,18 @@ class DashboardController extends Controller
             ->unique()
             ->count();
 
+        // Cek apakah ada session absensi aktif
+        $activeSessions = \App\Models\AttendanceSession::where('is_active', true)->exists();
+        $isAbsensiActive = $activeSessions;
+
+        // Cek attendance record guru hari ini
+        $attendanceRecord = null;
+        if ($isAbsensiActive) {
+            $attendanceRecord = \App\Models\AttendanceRecord::where('user_id', $user->id)
+                ->whereDate('scanned_at', $currentTime->toDateString())
+                ->first();
+        }
+
         return view('teacher.dashboard', [
             'teacher' => $teacher,
             'schedulesToday' => $schedulesToday,
@@ -146,6 +160,8 @@ class DashboardController extends Controller
             'lessonsCount' => $lessonsCount,
             'roomsCount' => $roomsCount,
             'uniqueSubjectsCount' => $uniqueSubjectsCount,
+            'isAbsensiActive' => $isAbsensiActive,
+            'attendanceRecord' => $attendanceRecord,
             'title' => 'Dashboard Guru',
             'description' => 'Halaman dashboard guru',
         ]);
