@@ -55,7 +55,46 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <!-- Weekly Chart -->
         <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Grafik Kehadiran Mingguan</h3>
+            <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3 mb-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Grafik Status Absensi Mingguan
+                    </h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Periode: {{ $chartWeekLabel }}</p>
+                </div>
+
+                <form method="GET" class="flex flex-wrap gap-2 items-center">
+                    <input type="hidden" name="date" value="{{ request('date') }}">
+                    <input type="hidden" name="role" value="{{ request('role') }}">
+                    <input type="hidden" name="status" value="{{ request('status') }}">
+                    <input type="hidden" name="search" value="{{ request('search') }}">
+
+                    <input type="date" name="chart_week" value="{{ $chartFilters['week'] }}"
+                        class="rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 text-sm focus:ring-indigo-500 focus:border-indigo-500 dark:text-gray-300">
+
+                    <select name="chart_role"
+                        class="rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 text-sm focus:ring-indigo-500 focus:border-indigo-500 dark:text-gray-300">
+                        <option value="">Semua Role</option>
+                        <option value="Staff" {{ $chartFilters['role'] === 'Staff' ? 'selected' : '' }}>Staff</option>
+                        <option value="Guru" {{ $chartFilters['role'] === 'Guru' ? 'selected' : '' }}>Guru</option>
+                        <option value="Siswa" {{ $chartFilters['role'] === 'Siswa' ? 'selected' : '' }}>Siswa</option>
+                    </select>
+
+                    <select name="chart_status"
+                        class="rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 text-sm focus:ring-indigo-500 focus:border-indigo-500 dark:text-gray-300">
+                        <option value="">Semua Status</option>
+                        <option value="hadir" {{ $chartFilters['status'] === 'hadir' ? 'selected' : '' }}>Hadir</option>
+                        <option value="izin" {{ $chartFilters['status'] === 'izin' ? 'selected' : '' }}>Izin</option>
+                        <option value="sakit" {{ $chartFilters['status'] === 'sakit' ? 'selected' : '' }}>Sakit</option>
+                        <option value="alpa" {{ $chartFilters['status'] === 'alpa' ? 'selected' : '' }}>Alpa</option>
+                    </select>
+
+                    <button type="submit"
+                        class="bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 text-sm transition text-gray-700 dark:text-gray-300">
+                        Filter Grafik
+                    </button>
+                </form>
+            </div>
+
             <div class="h-64">
                 <canvas id="weeklyChart"></canvas>
             </div>
@@ -81,6 +120,16 @@
                         <span class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ $activeSessionsCount }}
                             Kelas</span>
                     </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 dark:text-gray-400">Dibuka pada</span>
+                        <span class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ $sessionOpenedToday }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 dark:text-gray-400">Ditutup pada</span>
+                        <span class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ $sessionClosedToday }}
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -88,7 +137,6 @@
                 @if (!$isAbsensiActive && !$sessionTodayExists)
                     <form action="{{ route('admin.attendance.store') }}" method="POST">
                         @csrf
-                        {{-- Dummy ID, controller handles finding sessions --}}
                         <input type="hidden" name="timetable_entry_id" value="0">
                         <button type="submit"
                             class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 shadow-lg transition transform hover:-translate-y-1">
@@ -139,6 +187,10 @@
 
             <!-- Filters -->
             <form method="GET" class="flex flex-wrap gap-2 items-center">
+                <input type="hidden" name="chart_week" value="{{ $chartFilters['week'] }}">
+                <input type="hidden" name="chart_role" value="{{ $chartFilters['role'] }}">
+                <input type="hidden" name="chart_status" value="{{ $chartFilters['status'] }}">
+
                 <input type="date" name="date" value="{{ request('date', date('Y-m-d')) }}"
                     class="rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 text-sm focus:ring-indigo-500 focus:border-indigo-500 dark:text-gray-300">
 
@@ -335,27 +387,24 @@
 
             new Chart(ctx, {
                 type: 'bar',
-                data: {
-                    labels: data.map(item => item.day),
-                    datasets: [{
-                        label: 'Total Kehadiran',
-                        data: data.map(item => item.total),
-                        backgroundColor: '#4F46E5', // Indigo 600
-                        borderRadius: 4,
-                        barThickness: 40
-                    }]
-                },
+                data,
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            display: false
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: document.documentElement.classList.contains('dark') ? '#9CA3AF' :
+                                    '#4B5563'
+                            }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
+                            stacked: true,
                             grid: {
                                 color: document.documentElement.classList.contains('dark') ? '#374151' :
                                     '#e5e7eb'
@@ -366,6 +415,7 @@
                             }
                         },
                         x: {
+                            stacked: true,
                             grid: {
                                 display: false
                             },

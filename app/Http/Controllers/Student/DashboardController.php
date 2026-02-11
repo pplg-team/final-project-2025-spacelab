@@ -144,8 +144,8 @@ class DashboardController extends Controller
             $classroom = Classroom::with('major')->find($classIds->first());
             $studentClassFullName = $classroom?->full_name ?? ($classroom?->name ?? '-');
         }
-        // cek apakah ada sesi absen yang dibuka
-        $activeSession = AttendanceSession::where('is_active', true)->first();
+        // cek apakah ada sesi absen yang dibuka dan cek apakah siswa ini sudah absen di sesi tersebut
+        $activeSession = AttendanceSession::where('is_active', true)->whereDate('created_at', Carbon::today())->first();
         $isAbsensiActive = $activeSession !== null;
         $activeSessionToken = $activeSession?->token;
 

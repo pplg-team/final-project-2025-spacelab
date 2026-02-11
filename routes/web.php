@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', [PagesController::class, 'index'])->name('welcome');
+Route::get('/attendance-qr', [PagesController::class, 'attendanceQr'])->name('attendance.qr');
 
 // Redirect Login
 Route::get('/redirect', function () {

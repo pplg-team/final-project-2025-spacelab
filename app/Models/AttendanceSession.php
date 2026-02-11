@@ -70,6 +70,14 @@ class AttendanceSession extends Model
         // Mark alpha for students who didn't attend
         foreach ($studentsInClass as $user) {
             if (!$user) continue;
+            // If student has ANY attendance record today, skip marking alpha
+            $hasAttendedToday = AttendanceRecord::where('user_id', $user->id)
+                ->whereDate('scanned_at', \Carbon\Carbon::today())
+                ->exists();
+
+            if ($hasAttendedToday) {
+                continue;
+            }
 
             // Check if this student already has attendance record for this session
             $hasRecord = AttendanceRecord::where('attendance_session_id', $this->id)
@@ -77,7 +85,7 @@ class AttendanceSession extends Model
                 ->exists();
 
             if (!$hasRecord) {
-                // Create alpha record
+                // Create alpha record (user hasn't attended any session today)
                 AttendanceRecord::create([
                     'attendance_session_id' => $this->id,
                     'user_id' => $user->id,

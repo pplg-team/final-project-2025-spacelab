@@ -5,11 +5,37 @@
         </h2>
     </x-slot>
 
+    {{-- Alert absen pojok kanan bawah --}}
+    @if ($isAbsensiActive && !$attendanceRecord)
+        <div
+            class="bg-white shadow-lg rounded-2xl overflow-hidden
+                    border-2 border-blue-200 dark:border-blue-600 p-5 md:p-6
+                    hover:shadow-xl transition-all duration-150 fixed right-0 bottom-0 w-full max-w-sm z-10 ring-2 ring-blue-100 dark:ring-blue-500/30">
+            <div class="flex items-center justify-between gap-4">
+                <div class="flex-1">
+                    <p class="text-xs md:text-sm font-semibold text-blue-600 dark:text-blue-400 mb-2 uppercase tracking-wide">Absensi Hari Ini</p>
+                        <h3 class="text-2xl font-extrabold text-red-600 dark:text-red-400 mb-2">Belum Absen</h3>
+                        <a href="{{ route('siswa.attendance.index') }}"
+                            class="inline-block px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors duration-200">
+                            Absen Sekarang
+                            <x-heroicon-o-arrow-right class="w-4 h-4 inline-block ml-1" />
+                        </a>
+                </div>
+                <div
+                    class="flex-shrink-0 w-16 h-16 bg-gradient-to-br {{ $attendanceRecord ? 'from-green-100 to-green-50 dark:from-green-900/30 dark:to-green-800/20' : 'from-red-100 to-red-50 dark:from-red-900/30 dark:to-red-800/20' }} rounded-xl flex items-center justify-center
+                            border-2 {{ $attendanceRecord ? 'border-green-300 dark:border-green-600' : 'border-red-300 dark:border-red-600' }} shadow-md">
+                        <x-heroicon-o-exclamation-circle
+                            class="w-8 h-8 text-red-600 dark:text-red-400" />
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="py-10">
         <div>
 
             {{-- Statistik Ringkas --}}
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
 
                 <!-- Card 1 -->
                 <div
@@ -52,42 +78,7 @@
                     </div>
                 </div>
 
-                {{-- Card 3 --}}
-                @if ($isAbsensiActive)
-                    <div
-                        class="bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden
-                                border border-gray-100 dark:border-gray-800 p-4 md:p-5
-                                hover:shadow-md transition-all duration-150">
-                        <div class="flex items-center justify-between gap-4">
-                            <div>
-                                <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mb-1">Absensi Hari Ini</p>
-                                @if ($attendanceRecord)
-                                    <h3 class="text-xl font-extrabold text-green-600 dark:text-green-400">
-                                        Sudah Absen</h3>
-                                    <p class="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 mt-2">Status:
-                                        {{ ucfirst($attendanceRecord->status ?? 'hadir') }}</p>
-                                @else
-                                    <h3 class="text-xl font-extrabold text-red-600 dark:text-red-400">Belum Absen</h3>
-                                    <a href="{{ route('siswa.attendance.index') }}"
-                                        class="text-xs text-blue-500 dark:text-blue-400">Absen Sekarang</a>
-                                @endif
-                            </div>
-                            <div
-                                class="bg-gray-50 dark:bg-gray-800 p-2 md:p-3 rounded-lg flex items-center justify-center
-                                        border border-gray-100 dark:border-gray-700">
-                                @if ($attendanceRecord)
-                                    <x-heroicon-o-check-circle
-                                        class="w-5 h-5 md:w-6 md:h-6 text-green-500 dark:text-green-400" />
-                                @else
-                                    <x-heroicon-o-x-circle
-                                        class="w-5 h-5 md:w-6 md:h-6 text-red-500 dark:text-red-400" />
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-                <!-- Card 4 -->
+                <!-- Card 3 -->
                 <div
                     class="bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden
                             border border-gray-100 dark:border-gray-800 p-4 md:p-5
@@ -216,7 +207,7 @@
                                             {{-- Ongoing Badge --}}
                                             @if ($isOngoing)
                                                 <div
-                                                    class="absolute top-0 right-0 bg-blue-300 text-gray-900 px-4 py-1.5 rounded-bl-xl shadow flex items-center gap-2 z-10">
+                                                    class="absolute top-0 right-0 bg-blue-300 text-gray-900 px-4 py-1.5 rounded-bl-xl shadow flex items-center gap-2">
                                                     <span class="relative flex h-2.5 w-2.5">
                                                         <span
                                                             class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
@@ -229,7 +220,7 @@
 
                                             @if ($isPast)
                                                 <div
-                                                    class="absolute top-3 right-3 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-1 rounded-full shadow-sm z-10">
+                                                    class="absolute top-3 right-3 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-1 rounded-full shadow-sm">
                                                     <span class="text-xs font-semibold">SELESAI</span>
                                                 </div>
                                             @endif
@@ -390,3 +381,4 @@
         </div>
     </div>
 </x-app-layout>
+

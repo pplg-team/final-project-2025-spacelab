@@ -22,8 +22,14 @@ class AttendanceController extends Controller
 
     public function index()
     {
-        // Show scanner and form
-        // We can pass user's name or other info if needed for the view
+        // cek apakah user sudah absen hari ini
+        $user = Auth::user();
+        $hasAttendedToday = AttendanceRecord::where('user_id', $user->id)
+            ->whereDate('scanned_at', now()->toDateString())
+            ->exists();
+        if ($hasAttendedToday) {
+            return redirect()->route($user->role->lower_name . '.index')->with('info', 'Anda sudah melakukan absensi hari ini.');
+        }   
         return view('attendance.index');
     }
 
@@ -56,7 +62,16 @@ class AttendanceController extends Controller
         ]);
 
         $user = Auth::user();
-        
+
+        // Prevent multiple attendance submissions in the same day across different sessions
+        $alreadyAttendedToday = AttendanceRecord::where('user_id', $user->id)
+            ->whereDate('scanned_at', now()->toDateString())
+            ->exists();
+
+        if ($alreadyAttendedToday) {
+            return redirect()->back()->withInput()->with('error', 'Anda sudah melakukan absensi hari ini.');
+        }
+
         // Find session by token
         $session = AttendanceSession::where('token', $request->token)->first();
 
