@@ -94,6 +94,55 @@ class TimetableEntryController extends Controller
         // Data for the add/edit modal
         $teachers = Teacher::with('user')->get();
         $teacherSubjects = TeacherSubject::with(['teacher.user', 'subject'])->get();
+        $teacherSubjectOptions = $teacherSubjects
+            ->filter(function ($teacherSubject) {
+                return $teacherSubject->teacher_id
+                    && $teacherSubject->subject_id
+                    && $teacherSubject->teacher?->user?->name
+                    && $teacherSubject->subject?->name;
+            })
+            ->unique(function ($teacherSubject) {
+                return $teacherSubject->teacher_id . '-' . $teacherSubject->subject_id;
+            })
+            ->sortBy(function ($teacherSubject) {
+                return ($teacherSubject->subject?->name ?? '') . '|' . ($teacherSubject->teacher?->user?->name ?? '');
+            })
+            ->values()
+            ->map(function ($teacherSubject) {
+                return [
+                    'id' => $teacherSubject->id,
+                    'teacher_id' => $teacherSubject->teacher_id,
+                    'teacher_name' => $teacherSubject->teacher?->user?->name ?? 'Guru',
+                    'subject_id' => $teacherSubject->subject_id,
+                    'subject_name' => $teacherSubject->subject?->name ?? 'Mapel',
+                ];
+            });
+
+        // Map guru yang sudah sibuk per slot (hari + jam) pada block yang sama.
+        $busyTeachersBySlot = [];
+        if ($selectedTemplate?->block_id) {
+            $busyEntries = TimetableEntry::query()
+                ->whereHas('template', function ($query) use ($selectedTemplate) {
+                    $query->where('block_id', $selectedTemplate->block_id);
+                })
+                ->with('teacherSubject:id,teacher_id')
+                ->get(['day_of_week', 'period_id', 'teacher_subject_id']);
+
+            foreach ($busyEntries as $busyEntry) {
+                $teacherId = $busyEntry->teacher_id ?: $busyEntry->teacherSubject?->teacher_id;
+                if (! $teacherId) {
+                    continue;
+                }
+
+                $slotKey = $busyEntry->day_of_week . '-' . $busyEntry->period_id;
+                $busyTeachersBySlot[$slotKey] = $busyTeachersBySlot[$slotKey] ?? [];
+                $busyTeachersBySlot[$slotKey][] = $teacherId;
+            }
+
+            foreach ($busyTeachersBySlot as $slotKey => $teacherIds) {
+                $busyTeachersBySlot[$slotKey] = array_values(array_unique($teacherIds));
+            }
+        }
         $roomHistories = RoomHistory::with('room')
             ->active()
             ->get();
@@ -107,7 +156,7 @@ class TimetableEntryController extends Controller
             5 => "Jum'at",
         ];
 
-        return view('admin.schedules.index', [
+        return view('admin.schedules.timetable.index', [
             'title' => 'Jadwal Pelajaran',
             'description' => 'Kelola jadwal pelajaran per kelas',
             'activeTerm' => $activeTerm,
@@ -124,6 +173,8 @@ class TimetableEntryController extends Controller
             'days' => $days,
             'teachers' => $teachers,
             'teacherSubjects' => $teacherSubjects,
+            'teacherSubjectOptions' => $teacherSubjectOptions,
+            'busyTeachersBySlot' => $busyTeachersBySlot,
             'roomHistories' => $roomHistories,
         ]);
     }

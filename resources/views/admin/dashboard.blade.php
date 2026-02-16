@@ -157,20 +157,19 @@
                                 <x-heroicon-o-calendar class="w-5 h-5" />
                                 <span>Absensi Hari Ini</span>
                             </div>
-                            @if($attendanceToday)
-                            <form action="#">
-                                <div class="flex items-center gap-3">
-                                    <x-heroicon-o-chevron-right class="w-5 h-5" />
-                                    <button class="text-sm font-medium text-gray-900 dark:text-white">
-                                        Aktifkan
-                                    </button>
-                                </div>
-                            </form>
+                            @if (!$attendanceToday)
+                                <a href="{{ route('admin.attendance.index') }}">
+                                    <div class="flex items-center gap-3">
+                                        <button class="text-sm font-medium text-gray-900 dark:text-white">
+                                            Aktifkan
+                                        </button>
+                                    </div>
+                                </a>
                             @else
-                            <div class="flex items-center gap-3">
-                                <x-heroicon-o-check class="w-5 h-5" />
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">Sudah Aktif</span>
-                            </div>
+                                <div class="flex items-center gap-3">
+                                    <x-heroicon-o-check class="w-5 h-5" />
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">Sudah Aktif</span>
+                                </div>
                             @endif
                         </div>
                     </div>

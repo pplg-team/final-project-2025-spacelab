@@ -15,7 +15,7 @@ class TimetableEntry extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['template_id', 'day_of_week', 'period_id', 'teacher_subject_id', 'room_history_id', 'teacher_id'];
+    protected $fillable = ['template_id', 'day_of_week', 'period_id', 'teacher_subject_id', 'room_history_id'];
     protected $casts = [
         'day_of_week' => 'integer'
     ];

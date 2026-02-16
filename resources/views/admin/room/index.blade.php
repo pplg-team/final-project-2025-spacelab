@@ -280,9 +280,128 @@
                         </div>
                     </div>
                 @endforelse
-            </div>
+            </div> <!-- Close space-y-4 -->
+
+            @if ($undefinedRooms->count() > 0)
+                <!-- Unassigned Rooms -->
+                <div
+                    class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg overflow-hidden border-2 border-dashed border-yellow-300 dark:border-yellow-700/50">
+                    <div class="p-4 bg-yellow-50/50 dark:bg-yellow-900/10">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div
+                                        class="h-12 w-12 rounded-lg bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center">
+                                        <x-heroicon-o-exclamation-triangle
+                                            class="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                        Ruangan Tanpa Gedung
+                                    </h3>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        Terdapat {{ $undefinedRooms->count() }} ruangan yang belum dialokasikan ke
+                                        gedung manapun.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-200 dark:border-gray-700">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-900">
+                                    <tr>
+                                        <th scope="col"
+                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Kode</th>
+                                        <th scope="col"
+                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Nama</th>
+                                        <th scope="col"
+                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Lantai</th>
+                                        <th scope="col"
+                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Kapasitas</th>
+                                        <th scope="col"
+                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Tipe</th>
+                                        <th scope="col"
+                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Status</th>
+                                        <th scope="col"
+                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                    @foreach ($undefinedRooms as $room)
+                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors room-row"
+                                            data-room-name="{{ strtolower($room->name) }}"
+                                            data-room-code="{{ strtolower($room->code) }}"
+                                            data-room-type="{{ $room->type }}">
+                                            <td
+                                                class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                {{ $room->code }}</td>
+                                            <td
+                                                class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                                                {{ $room->name }}</td>
+                                            <td
+                                                class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                                                {{ $room->floor ?? '-' }}</td>
+                                            <td
+                                                class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                                                {{ $room->capacity ?? '-' }}</td>
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <span
+                                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                                                    {{ ucfirst($room->type) }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                @if ($room->is_active)
+                                                    <span
+                                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">Aktif</span>
+                                                @else
+                                                    <span
+                                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Nonaktif</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <div class="flex items-center gap-2">
+                                                    <button onclick="viewRoom('{{ $room->id }}')"
+                                                        class="p-1.5 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-md transition-colors"
+                                                        title="Lihat Detail">
+                                                        <x-heroicon-o-eye class="w-5 h-5" />
+                                                    </button>
+                                                    <button onclick="editRoom('{{ $room->id }}')"
+                                                        class="p-1.5 text-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded-md transition-colors"
+                                                        title="Edit & Atur Gedung">
+                                                        <x-heroicon-o-pencil class="w-5 h-5" />
+                                                    </button>
+                                                    <button
+                                                        onclick="deleteRoom('{{ $room->id }}', '{{ $room->name }}')"
+                                                        class="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-md transition-colors"
+                                                        title="Hapus">
+                                                        <x-heroicon-o-trash class="w-5 h-5" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
+
+
 
     <!-- Add Building Modal -->
     <x-modal name="add-building-modal" focusable>
@@ -462,14 +581,16 @@
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kode *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kode
+                            *</label>
                         <x-text-input name="code" type="text" class="block w-full" :value="old('code')" required
                             placeholder="Contoh: R001" />
                         <x-input-error class="mt-2" :messages="$errors->get('code')" />
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama
+                            *</label>
                         <x-text-input name="name" type="text" class="block w-full" :value="old('name')" required
                             placeholder="Contoh: Ruang Kelas 1" />
                         <x-input-error class="mt-2" :messages="$errors->get('name')" />
@@ -507,7 +628,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipe *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipe
+                            *</label>
                         <x-select-input name="type" required>
                             @foreach ($roomTypes as $type)
                                 <option value="{{ $type }}" {{ old('type') == $type ? 'selected' : '' }}>
@@ -588,13 +710,15 @@
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kode *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kode
+                            *</label>
                         <x-text-input id="editRoomCode" name="code" type="text" class="block w-full"
                             required />
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama
+                            *</label>
                         <x-text-input id="editRoomName" name="name" type="text" class="block w-full"
                             required />
                     </div>
@@ -627,7 +751,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipe *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipe
+                            *</label>
                         <x-select-input id="editRoomType" name="type" required>
                             @foreach ($roomTypes as $type)
                                 <option value="{{ $type }}">{{ ucfirst($type) }}</option>

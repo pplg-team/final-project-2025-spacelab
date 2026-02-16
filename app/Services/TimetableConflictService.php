@@ -26,7 +26,9 @@ class TimetableConflictService
         ?string $excludeEntryId = null
     ): ?TimetableEntry {
         $query = TimetableEntry::query()
-            ->where('teacher_id', $teacherId)
+            ->whereHas('teacherSubject', function ($q) use ($teacherId) {
+                $q->where('teacher_id', $teacherId);
+            })
             ->where('day_of_week', $dayOfWeek)
             ->where('period_id', $periodId)
             ->whereHas('template', function ($q) use ($blockId) {

@@ -117,7 +117,9 @@ class DashboardController extends Controller
         $termPeriod = $activeTerm ? 'Periode: ' . $activeTerm->start_date->format('M d, Y') . ' - ' . $activeTerm->end_date->format('M d, Y') : '';
 
         // Absensi hari ini
-        $attendanceToday = AttendanceSession::where('start_time', '>=', Carbon::now()->format('Y-m-d'))->first();
+        // ubah ke true false
+        $attendanceToday = AttendanceSession::where('created_at', '=', Carbon::now()->format('Y-m-d'))->first();
+        $attendanceToday = $attendanceToday ? true : false;
 
         return view('admin.dashboard', [
             'todayEntries' => $todayEntries,

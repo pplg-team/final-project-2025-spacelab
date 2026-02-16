@@ -130,7 +130,13 @@ Route::middleware(['auth', 'role:Admin'])
         Route::delete('/rooms/{room}', [AdminRoomController::class, 'destroy'])->name('rooms.destroy');
 
         // Schedules - Main Entry Point
-        Route::get('/schedules', [AdminTimetableEntryController::class, 'index'])->name('schedules.index');
+        Route::get('/schedules', [AdminScheduleController::class, 'index'])->name('schedules.index');
+        // Room Schedule
+
+        Route::get('/schedules/rooms', [AdminScheduleController::class, 'roomsIndex'])->name('schedules.rooms.index');
+
+        // TimeTable schedule
+        Route::get('/schedules/timetable', [AdminTimetableEntryController::class, 'index'])->name('schedules.timetable.index');        
 
         // Timetable Templates
         Route::get('/schedules/templates', [AdminTimetableTemplateController::class, 'index'])->name('schedules.templates.index');

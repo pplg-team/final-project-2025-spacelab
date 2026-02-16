@@ -24,11 +24,14 @@ class RoomController extends Controller
             ->orderBy('name')
             ->get();
 
+        $undefinedRooms = Room::where('building_id', null)->get();
+
         return view('admin.room.index', [
             'title' => 'Gedung & Ruangan',
             'description' => 'Kelola data gedung dan ruangan',
             'buildings' => $buildings,
             'roomTypes' => ['kelas', 'lab', 'aula', 'lainnya'],
+            'undefinedRooms' => $undefinedRooms,
         ]);
     }
 
@@ -56,7 +59,7 @@ class RoomController extends Controller
             'user_id' => Auth::id(),
             'entity' => 'ruangan (' . $validated['name'] . ')',
             'record_id' => Room::where('code', $validated['code'])->first()->id,
-            'action' => 'create_room',
+            'action' => 'create',
             'new_data' => [
                 'message' => 'Pengguna ' . Auth::user()->name . ' menambahkan ruangan baru pada ' . now()->toDateTimeString(),
                 'ip_address' => $request->ip(),
@@ -113,7 +116,7 @@ class RoomController extends Controller
             'user_id' => Auth::id(),
             'entity' => 'ruangan (' . $room->name . ')',
             'record_id' => $room->id,
-            'action' => 'update_room',
+            'action' => 'update',
             'new_data' => [
                 'message' => 'Pengguna ' . Auth::user()->name . ' memperbarui data ruangan pada ' . now()->toDateTimeString(),
                 'ip_address' => $request->ip(),
@@ -142,7 +145,7 @@ class RoomController extends Controller
             'user_id' => Auth::id(),
             'entity' => 'ruangan (' . $room->name . ')',
             'record_id' => $room->id,
-            'action' => 'delete_room',
+            'action' => 'delete',
             'new_data' => [
                 'message' => 'Pengguna ' . Auth::user()->name . ' menghapus ruangan pada ' . now()->toDateTimeString(),
                 'ip_address' => $request->ip(),

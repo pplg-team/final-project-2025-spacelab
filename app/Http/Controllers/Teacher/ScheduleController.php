@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\TimetableEntry;
-use App\Models\Teacher;
 use App\Models\Period;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;

@@ -8,7 +8,7 @@
     </x-slot>
 
         {{-- Alert absen pojok kanan bawah --}}
-    @if ($isAbsensiActive)
+    @if ($isAbsensiActive && !$attendanceRecord)
         <div
             class="bg-white shadow-lg rounded-2xl overflow-hidden
                     border-2 border-blue-200 dark:border-blue-600 p-5 md:p-6
@@ -16,30 +16,18 @@
             <div class="flex items-center justify-between gap-4">
                 <div class="flex-1">
                     <p class="text-xs md:text-sm font-semibold text-blue-600 dark:text-blue-400 mb-2 uppercase tracking-wide">Absensi Hari Ini</p>
-                    @if ($attendanceRecord)
-                        <h3 class="text-2xl font-extrabold text-green-600 dark:text-green-400 mb-1">
-                            Sudah Absen</h3>
-                        <p class="text-xs md:text-sm text-gray-600 dark:text-gray-300 font-medium">Status:
-                            {{ ucfirst($attendanceRecord->status ?? 'hadir') }}</p>
-                    @else
                         <h3 class="text-2xl font-extrabold text-red-600 dark:text-red-400 mb-2">Belum Absen</h3>
-                        <a href="{{ route('siswa.attendance.index') }}"
+                        <a href="{{ route('staff.attendance.index') }}"
                             class="inline-block px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors duration-200">
                             Absen Sekarang
                             <x-heroicon-o-arrow-right class="w-4 h-4 inline-block ml-1" />
                         </a>
-                    @endif  
                 </div>
                 <div
                     class="flex-shrink-0 w-16 h-16 bg-gradient-to-br {{ $attendanceRecord ? 'from-green-100 to-green-50 dark:from-green-900/30 dark:to-green-800/20' : 'from-red-100 to-red-50 dark:from-red-900/30 dark:to-red-800/20' }} rounded-xl flex items-center justify-center
                             border-2 {{ $attendanceRecord ? 'border-green-300 dark:border-green-600' : 'border-red-300 dark:border-red-600' }} shadow-md">
-                    @if ($attendanceRecord)
-                        <x-heroicon-o-check-circle
-                            class="w-8 h-8 text-green-600 dark:text-green-400" />
-                    @else
                         <x-heroicon-o-exclamation-circle
                             class="w-8 h-8 text-red-600 dark:text-red-400" />
-                    @endif
                 </div>
             </div>
         </div>

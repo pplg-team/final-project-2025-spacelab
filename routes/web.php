@@ -4,10 +4,23 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PagesController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\RoomController;
+use App\Http\Controllers\SearchStudentController;
+use App\Http\Controllers\SearchTeacherController;
 
 Route::get('/', [PagesController::class, 'index'])->name('welcome');
 Route::get('/attendance-qr', [PagesController::class, 'attendanceQr'])->name('attendance.qr');
 
+Route::group([
+    'prefix' => 'views',
+    'as' => 'views.',
+], function () {
+    Route::get('/', [PagesController::class, 'views'])->name('views');
+    Route::get('/rooms', [RoomController::class, 'index'])->name('rooms');
+    Route::get('/rooms/{room}', [RoomController::class, 'show'])->name('rooms.show');
+    Route::get('/search-student', [SearchStudentController::class, 'index'])->name('search-student');
+    Route::get('/search-teacher', [SearchTeacherController::class, 'index'])->name('search-teacher');
+});
 // Redirect Login
 Route::get('/redirect', function () {
     $role = Auth::user()->role->lower_name;

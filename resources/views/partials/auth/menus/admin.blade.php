@@ -73,14 +73,14 @@
     class="flex items-center gap-3 px-4 py-2 text-sm rounded-md hover:bg-slate-200 dark:hover:bg-slate-800
    {{ request()->routeIs('admin.rooms.history') ? 'bg-slate-200 dark:bg-slate-800 font-semibold' : '' }}">
     <x-heroicon-o-document-text class="w-5 h-5" />
-    Riwayat Ruangan
+    Penggunaan Ruangan
 </a>
 
 <a href="{{ route('admin.schedules.index') }}"
     class="flex items-center gap-3 px-4 py-2 text-sm rounded-md hover:bg-slate-200 dark:hover:bg-slate-800
-   {{ request()->routeIs('admin.schedules.index') ? 'bg-slate-200 dark:bg-slate-800 font-semibold' : '' }}">
+   {{ request()->routeIs('admin.schedules.*') ? 'bg-slate-200 dark:bg-slate-800 font-semibold' : '' }}">
     <x-heroicon-o-clock class="w-5 h-5" />
-    Jadwal Sekolah
+    Kelola Jadwal
 </a>
 
 <a href="{{ route('admin.reports.index') }}"

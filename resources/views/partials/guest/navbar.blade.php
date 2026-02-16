@@ -11,7 +11,7 @@
                 </a>
             </div>
 
-            @if (!request()->routeIs('login'))
+            @if (!request()->routeIs('login') && !request()->routeIs('attendance.qr') && !request()->routeIs('views.*'))
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-6 text-sm">
                     <a href="#features" class="hover:text-accent transition">Fitur</a>

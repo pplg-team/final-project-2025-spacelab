@@ -36,4 +36,13 @@ class PagesController extends Controller
             ]
         );
     }
+
+    public function views() {
+        return view('pages.views',
+            [
+                'title' => 'Views',
+                'description' => 'Views'
+            ]
+        );
+    }
 }

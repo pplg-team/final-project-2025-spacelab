@@ -7,8 +7,6 @@ use Illuminate\Support\Facades\Schema;
 use App\Models\{
     TimetableTemplate,
     TimetableEntry,
-    Classroom,
-    Block,
     Term,
     RoomHistory,
     TeacherSubject,
@@ -206,7 +204,6 @@ class TimetableSeeder extends Seeder
                             'period_id'           => $periodId,
                             'teacher_subject_id'  => $candidate->id,
                             'room_history_id'     => $roomHistEntry->id,
-                            'teacher_id'          => $candidate->teacher_id,
                         ]);
 
                         // mark teacher and room used in this slot

@@ -59,7 +59,7 @@ class TimetableTemplateController extends Controller
             return $template->class_id;
         });
 
-        return view('admin.schedules.templates.index', [
+        return view('admin.schedules.timetable.templates.index', [
             'title' => 'Template Jadwal',
             'description' => 'Kelola template jadwal per kelas',
             'activeTerm' => $activeTerm,
