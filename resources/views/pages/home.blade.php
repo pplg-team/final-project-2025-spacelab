@@ -1,6 +1,10 @@
 <x-guest-layout :title="$title" :description="$description">
     @vite('resources/css/home-animations.css')
     @vite('resources/js/home-interactions.js')
+
+    {{--
+        LANDING PAGE PERLU DIPERBARUI KARENA FITUR YANG ADA DI APLIKASI SUDAH JAUH LEBIH LENGKAP DAN MENCAKUP JAUH LEBIH BANYAK HAL
+     --}}
     <div>
         <!-- HERO -->
         <section class="relative py-60 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900 overflow-hidden">
@@ -17,8 +21,7 @@
                         class="hero-badge inline-block px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-xs font-medium border border-slate-200 dark:border-slate-700">
                         Digitalisasi Manajemen Sekolah
                     </div>
-                    <h1
-                        class="hero-title text-4xl md:text-5xl font-bold leading-tight text-slate-900 dark:text-white">
+                    <h1 class="hero-title text-4xl md:text-5xl font-bold leading-tight text-slate-900 dark:text-white">
                         <span class="typing-text">Kelola Jadwal Sekolah</span><br>
                         dengan <span class="gradient-text">Lebih Efisien</span>
                     </h1>
@@ -31,9 +34,9 @@
                             class="btn-primary ripple-effect magnetic-button px-6 py-3 bg-slate-800 dark:bg-slate-700 text-white rounded inline-block text-center hover:bg-slate-900 dark:hover:bg-slate-600 transition">
                             Masuk Sistem
                         </a>
-                        <a href="#features"
+                        <a href="{{ route('views.views') }}"
                             class="btn-secondary ripple-effect px-6 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded inline-block text-center hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-                            Pelajari Lebih Lanjut
+                            Jelajahi Sistem
                         </a>
                     </div>
                 </div>
@@ -355,7 +358,8 @@
                         </div>
                     </div>
 
-                    <div class="scroll-reveal fade-left feature-card bg-white dark:bg-slate-950 p-6 rounded border border-slate-200 dark:border-slate-800">
+                    <div
+                        class="scroll-reveal fade-left feature-card bg-white dark:bg-slate-950 p-6 rounded border border-slate-200 dark:border-slate-800">
                         <div class="flex items-start gap-4">
                             <div class="feature-icon bg-slate-100 dark:bg-slate-900 p-3 rounded">
                                 <x-heroicon-o-clipboard-document-list
@@ -382,7 +386,8 @@
                         </div>
                     </div>
 
-                    <div class="scroll-reveal fade-left feature-card bg-white dark:bg-slate-950 p-6 rounded border border-slate-200 dark:border-slate-800">
+                    <div
+                        class="scroll-reveal fade-left feature-card bg-white dark:bg-slate-950 p-6 rounded border border-slate-200 dark:border-slate-800">
                         <div class="flex items-start gap-4">
                             <div class="feature-icon bg-slate-100 dark:bg-slate-900 p-3 rounded">
                                 <x-heroicon-o-book-open class="w-6 h-6 text-slate-700 dark:text-slate-300" />
@@ -549,7 +554,8 @@
                     <div
                         class="scroll-reveal fade-right bg-white dark:bg-slate-950 rounded p-8 border border-slate-200 dark:border-slate-800">
                         <div class="space-y-6">
-                            <div class="scroll-reveal fade-left testimonial-card border-l-4 border-slate-400 dark:border-slate-600 pl-4">
+                            <div
+                                class="scroll-reveal fade-left testimonial-card border-l-4 border-slate-400 dark:border-slate-600 pl-4">
                                 <p class="text-slate-700 dark:text-slate-300 italic mb-3 leading-relaxed">
                                     "SpaceLab sangat membantu kami dalam mengelola 45 kelas dan 80 guru. Tidak ada lagi
                                     masalah ruangan dobel atau guru mengajar di dua tempat sekaligus. Penyusunan jadwal
@@ -560,7 +566,8 @@
                                 <p class="text-xs text-slate-500 dark:text-slate-400">Kepala Sekolah SMA Negeri 5</p>
                             </div>
 
-                            <div class="scroll-reveal fade-left testimonial-card border-l-4 border-slate-400 dark:border-slate-600 pl-4">
+                            <div
+                                class="scroll-reveal fade-left testimonial-card border-l-4 border-slate-400 dark:border-slate-600 pl-4">
                                 <p class="text-slate-700 dark:text-slate-300 italic mb-3 leading-relaxed">
                                     "Dengan SpaceLab, kami bisa memantau penggunaan ruangan secara real-time. Efisiensi
                                     penggunaan fasilitas meningkat signifikan. Ruang laboratorium dan workshop yang dulu
@@ -572,7 +579,8 @@
                                 </p>
                             </div>
 
-                            <div class="scroll-reveal fade-left testimonial-card border-l-4 border-slate-400 dark:border-slate-600 pl-4">
+                            <div
+                                class="scroll-reveal fade-left testimonial-card border-l-4 border-slate-400 dark:border-slate-600 pl-4">
                                 <p class="text-slate-700 dark:text-slate-300 italic mb-3 leading-relaxed">
                                     "Interface yang sederhana membuat staff kami yang tidak terlalu paham teknologi bisa
                                     langsung menggunakan sistem ini. Pelatihan singkat sudah cukup untuk mereka bisa
@@ -678,7 +686,8 @@
                         </div>
                     </div>
 
-                    <div class="scroll-reveal fade-up faq-item border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950">
+                    <div
+                        class="scroll-reveal fade-up faq-item border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950">
                         <div class="p-5">
                             <h3 class="font-semibold text-slate-900 dark:text-white mb-2">Berapa lama waktu yang
                                 dibutuhkan untuk implementasi?</h3>
@@ -690,7 +699,8 @@
                         </div>
                     </div>
 
-                    <div class="scroll-reveal fade-up faq-item border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950">
+                    <div
+                        class="scroll-reveal fade-up faq-item border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950">
                         <div class="p-5">
                             <h3 class="font-semibold text-slate-900 dark:text-white mb-2">Apakah data sekolah aman di
                                 SpaceLab?</h3>
@@ -702,7 +712,8 @@
                         </div>
                     </div>
 
-                    <div class="scroll-reveal fade-up faq-item border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950">
+                    <div
+                        class="scroll-reveal fade-up faq-item border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950">
                         <div class="p-5">
                             <h3 class="font-semibold text-slate-900 dark:text-white mb-2">Apakah bisa mengimpor data
                                 yang sudah ada?</h3>
@@ -714,7 +725,8 @@
                         </div>
                     </div>
 
-                    <div class="scroll-reveal fade-up faq-item border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950">
+                    <div
+                        class="scroll-reveal fade-up faq-item border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950">
                         <div class="p-5">
                             <h3 class="font-semibold text-slate-900 dark:text-white mb-2">Apakah ada pelatihan untuk
                                 pengguna?</h3>
