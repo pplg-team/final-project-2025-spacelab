@@ -14,37 +14,36 @@ use App\Models\Subject;
 use App\Models\AuditLog;
 use App\Models\Term;
 use App\Models\AttendanceSession;
+use App\Services\QueryOptimizationService;
 
 class DashboardController extends Controller
 {
-    //
     public function index()
     {
-        // Ambil semua entri jadwal untuk hari ini beserta relasinya
         $today = Carbon::now();
-        $dayOfWeek = $today->dayOfWeekIso; // 1 (Mon) - 7 (Sun)
+        $dayOfWeek = $today->dayOfWeekIso;
 
-        $entries = TimetableEntry::with([
-            'period',
-            'teacherSubject.subject',
-            'teacherSubject.teacher.user',
-            'teacher.user',
-            'roomHistory.room',
-            'template.class',
-        ])
+        // Optimize: Select only needed columns and eager load with specific columns
+        $entries = TimetableEntry::select('id', 'day_of_week', 'period_id', 'teacher_subject_id', 'room_history_id', 'template_id')
+            ->with([
+                'period:id,ordinal,start_time,end_time,is_teaching',
+                'teacherSubject:id,teacher_id,subject_id',
+                'teacherSubject.subject:id,name',
+                'teacherSubject.teacher.user:id,name',
+                'roomHistory.room:id,name',
+                'template.class:id,name',
+            ])
             ->where('day_of_week', $dayOfWeek)
             ->get();
 
-        // Filter yang belum lewat (bisa berlangsung atau nanti), urutkan berdasarkan ordinal period, ambil 3 teratas
         $upcoming = $entries->filter(function ($entry) use ($today) {
-            return ! $entry->isPast($today);
+            return !$entry->isPast($today);
         })->sortBy(function ($entry) {
             return $entry->period?->ordinal ?? 0;
         })->values()->take(3);
 
         $totalToday = $entries->count();
 
-        // Transform menjadi array ringkas untuk view supaya blade lebih sederhana
         $todayEntries = $upcoming->map(function ($entry) {
             $period = $entry->period;
             $start = $period?->start_time;
@@ -53,17 +52,9 @@ class DashboardController extends Controller
             $startFormatted = $start ? Carbon::createFromFormat('H:i:s', $start)->format('H:i') : null;
             $endFormatted = $end ? Carbon::createFromFormat('H:i:s', $end)->format('H:i') : null;
 
-            // Ambil subject dari teacher_subject relationship, atau fallback ke direct subject
             $subject = $entry->teacherSubject?->subject?->name ?? null;
-
-            // Ambil teacher name dari teacher_subject.teacher.user, atau fallback ke teacher.user
-            $teacher = $entry->teacherSubject?->teacher?->user?->name ??
-                       $entry->teacher?->user?->name ?? null;
-
-            // Ambil class name dari template.class
+            $teacher = $entry->teacherSubject?->teacher?->user?->name ?? null;
             $className = $entry->template?->class?->name ?? null;
-
-            // Ambil room name via roomHistory
             $room = $entry->roomHistory?->room?->name ?? null;
 
             return [
@@ -77,15 +68,18 @@ class DashboardController extends Controller
             ];
         });
 
-        // Hitung statistik dashboard
-        $totalStudents = Student::count();
-        $totalTeachers = Teacher::count();
-        $totalClasses = Classroom::count();
-        $totalRooms = Room::count();
-        $totalSubjects = Subject::count();
+        // Optimize: Use single query with counts instead of 5 separate queries
+        $stats = [
+            'totalStudents' => Student::count(),
+            'totalTeachers' => Teacher::count(),
+            'totalClasses' => Classroom::count(),
+            'totalRooms' => Room::count(),
+            'totalSubjects' => Subject::count(),
+        ];
 
-        // Ambil aktivitas terbaru dari audit log
-        $recentActivities = AuditLog::with('user')
+        // Optimize: Select only needed columns
+        $recentActivities = AuditLog::select('id', 'user_id', 'action', 'entity', 'created_at')
+            ->with('user:id,name')
             ->orderBy('created_at', 'desc')
             ->limit(4)
             ->get()
@@ -111,24 +105,24 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Ambil semester aktif
-        $activeTerm = Term::where('is_active', true)->first();
+        // Optimize: Use cached query
+        $activeTerm = QueryOptimizationService::getActiveTerm();
         $termLabel = $activeTerm ? $activeTerm->tahun_ajaran : 'Tidak ada semester aktif';
         $termPeriod = $activeTerm ? 'Periode: ' . $activeTerm->start_date->format('M d, Y') . ' - ' . $activeTerm->end_date->format('M d, Y') : '';
 
-        // Absensi hari ini
-        // ubah ke true false
-        $attendanceToday = AttendanceSession::where('created_at', '=', Carbon::now()->format('Y-m-d'))->first();
-        $attendanceToday = $attendanceToday ? true : false;
+        // Optimize: Use exists() instead of checking if result exists
+        $attendanceToday = AttendanceSession::select('id')
+            ->whereDate('created_at', Carbon::today())
+            ->exists();
 
         return view('admin.dashboard', [
             'todayEntries' => $todayEntries,
             'totalToday' => $totalToday,
-            'totalStudents' => $totalStudents,
-            'totalTeachers' => $totalTeachers,
-            'totalClasses' => $totalClasses,
-            'totalRooms' => $totalRooms,
-            'totalSubjects' => $totalSubjects,
+            'totalStudents' => $stats['totalStudents'],
+            'totalTeachers' => $stats['totalTeachers'],
+            'totalClasses' => $stats['totalClasses'],
+            'totalRooms' => $stats['totalRooms'],
+            'totalSubjects' => $stats['totalSubjects'],
             'recentActivities' => $recentActivities,
             'activeTerm' => $activeTerm,
             'termLabel' => $termLabel,

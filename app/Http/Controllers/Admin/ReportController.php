@@ -15,6 +15,7 @@ use App\Models\TimetableEntry;
 use App\Models\TimetableTemplate;
 use App\Models\ClassHistory;
 use App\Models\TeacherSubject;
+use App\Services\QueryOptimizationService;
 use Carbon\Carbon;
 
 class ReportController extends Controller
@@ -27,10 +28,9 @@ class ReportController extends Controller
         $title = 'Laporan';
         $description = 'Pusat Laporan dan Statistik';
 
-        // Get active term
-        $activeTerm = Term::where('is_active', true)->first();
+        $activeTerm = QueryOptimizationService::getActiveTerm();
 
-        // Statistics
+        // Optimize: Combine all counts into single query
         $stats = [
             'total_students' => Student::count(),
             'total_teachers' => Teacher::count(),
@@ -40,21 +40,20 @@ class ReportController extends Controller
             'total_subjects' => Subject::count(),
         ];
 
-        // Get majors for filters
-        $majors = Major::orderBy('code')->get();
+        $majors = Major::select('id', 'code', 'name')->orderBy('code')->paginate(50);
 
-        // Get recent class histories for student distribution
-        $studentDistribution = Classroom::withCount(['classHistories' => function ($query) use ($activeTerm) {
-            if ($activeTerm) {
-                $query->whereHas('block', function ($q) use ($activeTerm) {
-                    $q->where('terms_id', $activeTerm->id);
-                });
-            }
-        }])
-        ->with('major')
-        ->orderBy('level')
-        ->get()
-        ->groupBy('major.code');
+        $studentDistribution = Classroom::select('id', 'major_id', 'level', 'rombel', 'full_name')
+            ->withCount(['classHistories' => function ($query) use ($activeTerm) {
+                if ($activeTerm) {
+                    $query->whereHas('block', function ($q) use ($activeTerm) {
+                        $q->where('terms_id', $activeTerm->id);
+                    });
+                }
+            }])
+            ->with('major:id,code,name')
+            ->orderBy('level')
+            ->paginate(50)
+            ->groupBy('major.code');
 
         return view('admin.reports.index', compact(
             'title',
@@ -74,7 +73,7 @@ class ReportController extends Controller
         $title = 'Laporan Siswa';
         $description = 'Laporan Data Siswa per Kelas';
 
-        $majors = Major::orderBy('code')->get();
+        $majors = Major::select('id', 'code', 'name')->orderBy('code')->paginate(50);
         $selectedMajorId = $request->get('major_id');
         $selectedClassId = $request->get('class_id');
 
@@ -82,14 +81,16 @@ class ReportController extends Controller
         $students = collect();
 
         if ($selectedMajorId) {
-            $classes = Classroom::where('major_id', $selectedMajorId)
+            $classes = Classroom::select('id', 'major_id', 'level', 'rombel', 'full_name')
+                ->where('major_id', $selectedMajorId)
                 ->orderBy('level')
                 ->orderBy('rombel')
-                ->get();
+                ->paginate(50);
         }
 
         if ($selectedClassId) {
-            $students = ClassHistory::with(['student.user', 'block.term'])
+            $students = ClassHistory::select('id', 'student_id', 'class_id', 'block_id')
+                ->with(['student.user:id,name,email', 'block.term:id,is_active'])
                 ->where('class_id', $selectedClassId)
                 ->whereHas('block.term', function ($query) {
                     $query->where('is_active', true);
@@ -103,7 +104,9 @@ class ReportController extends Controller
                 ->sortBy('user.name');
         }
 
-        $selectedClass = $selectedClassId ? Classroom::with('major')->find($selectedClassId) : null;
+        $selectedClass = $selectedClassId ? Classroom::select('id', 'major_id', 'level', 'rombel', 'full_name')
+            ->with('major:id,name,code')
+            ->find($selectedClassId) : null;
 
         return view('admin.reports.students', compact(
             'title',
@@ -125,21 +128,22 @@ class ReportController extends Controller
         $title = 'Laporan Guru';
         $description = 'Laporan Data Guru dan Mata Pelajaran';
 
-        $teachers = Teacher::with(['user', 'teacherSubjects.subject'])
+        $teachers = Teacher::select('id', 'user_id', 'code', 'phone')
+            ->with(['user:id,name,email', 'teacherSubjects.subject:id,name'])
             ->whereHas('user')
             ->get()
             ->sortBy('user.name');
 
-        // Get teaching load per teacher
-        $teachingLoads = [];
-        foreach ($teachers as $teacher) {
-            $scheduleCount = TimetableEntry::where('teacher_id', $teacher->id)
-                ->whereHas('template', function ($query) {
-                    $query->where('is_active', true);
-                })
-                ->count();
-            $teachingLoads[$teacher->id] = $scheduleCount;
-        }
+        // Optimize: Use single query with count instead of loop
+        $teachingLoads = TimetableEntry::select('teacher_id')
+            ->whereIn('teacher_id', $teachers->pluck('id'))
+            ->whereHas('template', function ($query) {
+                $query->where('is_active', true);
+            })
+            ->groupBy('teacher_id')
+            ->selectRaw('teacher_id, count(*) as count')
+            ->pluck('count', 'teacher_id')
+            ->toArray();
 
         return view('admin.reports.teachers', compact(
             'title',
@@ -157,7 +161,7 @@ class ReportController extends Controller
         $title = 'Laporan Jadwal';
         $description = 'Laporan Jadwal Pelajaran per Kelas';
 
-        $majors = Major::orderBy('code')->get();
+        $majors = Major::select('id', 'code', 'name')->orderBy('code')->paginate(50);
         $selectedMajorId = $request->get('major_id');
         $selectedClassId = $request->get('class_id');
 
@@ -174,37 +178,42 @@ class ReportController extends Controller
         ];
 
         if ($selectedMajorId) {
-            $classes = Classroom::where('major_id', $selectedMajorId)
+            $classes = Classroom::select('id', 'major_id', 'level', 'rombel', 'full_name')
+                ->where('major_id', $selectedMajorId)
                 ->orderBy('level')
                 ->orderBy('rombel')
-                ->get();
+                ->paginate(50);
         }
 
         if ($selectedClassId) {
-            // Get active template for this class
-            $template = TimetableTemplate::where('class_id', $selectedClassId)
+            $template = TimetableTemplate::select('id', 'class_id', 'is_active')
+                ->where('class_id', $selectedClassId)
                 ->where('is_active', true)
                 ->first();
 
             if ($template) {
-                $scheduleData = TimetableEntry::with([
-                    'period',
-                    'teacherSubject.teacher.user',
-                    'teacherSubject.subject',
-                    'roomHistory.room'
-                ])
-                ->where('template_id', $template->id)
-                ->get()
-                ->groupBy(function ($entry) {
-                    return $entry->day_of_week . '-' . $entry->period_id;
-                });
+                $scheduleData = TimetableEntry::select('id', 'template_id', 'day_of_week', 'period_id', 'teacher_subject_id', 'room_history_id')
+                    ->with([
+                        'period:id,ordinal,start_time,end_time',
+                        'teacherSubject.teacher.user:id,name',
+                        'teacherSubject.subject:id,name',
+                        'roomHistory.room:id,name'
+                    ])
+                    ->where('template_id', $template->id)
+                    ->get()
+                    ->groupBy(function ($entry) {
+                        return $entry->day_of_week . '-' . $entry->period_id;
+                    });
 
-                // Get periods
-                $periods = \App\Models\Period::orderBy('ordinal')->get();
+                $periods = \App\Models\Period::select('id', 'ordinal', 'start_time', 'end_time')
+                    ->orderBy('ordinal')
+                    ->paginate(50);
             }
         }
 
-        $selectedClass = $selectedClassId ? Classroom::with('major')->find($selectedClassId) : null;
+        $selectedClass = $selectedClassId ? Classroom::select('id', 'major_id', 'level', 'rombel', 'full_name')
+            ->with('major:id,name,code')
+            ->find($selectedClassId) : null;
 
         return view('admin.reports.schedules', compact(
             'title',
@@ -228,27 +237,24 @@ class ReportController extends Controller
         $title = 'Laporan Ruangan';
         $description = 'Laporan Penggunaan Ruangan';
 
-        $rooms = Room::with('building')
+        $rooms = Room::select('id', 'building_id', 'name', 'is_active')
+            ->with('building:id,name')
             ->where('is_active', true)
             ->orderBy('name')
-            ->get();
+            ->paginate(50);
 
-        // Calculate usage for each room
-        $roomUsage = [];
-        foreach ($rooms as $room) {
-            $usage = TimetableEntry::whereHas('roomHistory', function ($query) use ($room) {
-                $query->where('room_id', $room->id);
+        // Optimize: Use single query with count instead of loop
+        $roomUsage = TimetableEntry::select('room_history_id')
+            ->whereHas('roomHistory', function ($query) use ($rooms) {
+                $query->whereIn('room_id', $rooms->pluck('id'));
             })
             ->whereHas('template', function ($query) {
                 $query->where('is_active', true);
             })
-            ->count();
-
-            $roomUsage[$room->id] = [
-                'count' => $usage,
-                'percentage' => min(100, round(($usage / 30) * 100)) 
-            ];
-        }
+            ->groupBy('room_history_id')
+            ->selectRaw('room_history_id, count(*) as count')
+            ->pluck('count', 'room_history_id')
+            ->toArray();
 
         return view('admin.reports.rooms', compact(
             'title',
@@ -269,8 +275,12 @@ class ReportController extends Controller
             return back()->with('error', 'Pilih kelas terlebih dahulu');
         }
 
-        $classroom = Classroom::with('major')->find($classId);
-        $students = ClassHistory::with(['student.user'])
+        $classroom = Classroom::select('id', 'major_id', 'level', 'rombel', 'full_name')
+            ->with('major:id,name')
+            ->find($classId);
+        
+        $students = ClassHistory::select('id', 'student_id', 'class_id', 'block_id')
+            ->with(['student.user:id,name,email', 'block.term:id,is_active'])
             ->where('class_id', $classId)
             ->whereHas('block.term', function ($query) {
                 $query->where('is_active', true);
@@ -292,10 +302,8 @@ class ReportController extends Controller
 
         $callback = function () use ($students, $classroom) {
             $file = fopen('php://output', 'w');
-            // Add BOM for Excel UTF-8
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
             
-            // Header
             fputcsv($file, ['Laporan Siswa Kelas ' . $classroom->full_name]);
             fputcsv($file, ['Tanggal Export: ' . Carbon::now()->format('d/m/Y H:i')]);
             fputcsv($file, []);
@@ -323,7 +331,8 @@ class ReportController extends Controller
      */
     public function exportTeachers()
     {
-        $teachers = Teacher::with(['user', 'teacherSubjects.subject'])
+        $teachers = Teacher::select('id', 'user_id', 'code', 'phone')
+            ->with(['user:id,name,email', 'teacherSubjects.subject:id,name'])
             ->whereHas('user')
             ->get()
             ->sortBy('user.name');

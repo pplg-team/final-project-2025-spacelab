@@ -15,10 +15,19 @@ class TeacherController extends Controller
 {
     public function index(Request $request)
     {
-        $teachers = Teacher::with(['user', 'subjects', 'guardianClassHistories.class', 'roleAssignments', 'asCoordinatorAssignments'])
+        $teachers = Teacher::select('id', 'user_id', 'code', 'phone', 'avatar')
+            ->with([
+                'user:id,name,email',
+                'subjects:id,name,code',
+                'guardianClassHistories.class:id,full_name',
+                'roleAssignments.major:id,name',
+                'asCoordinatorAssignments.major:id,name'
+            ])
             ->paginate(15);
 
-        $subjects = Subject::orderBy('name')->get();
+        $subjects = Subject::select('id', 'name', 'code')
+            ->orderBy('name')
+            ->paginate(50);
 
         return view('admin.teacher.index', [
             'title' => 'Guru',
@@ -89,13 +98,19 @@ class TeacherController extends Controller
     public function show($id)
     {
         try {
-            $teacher = Teacher::with([
-                'user',
-                'subjects',
-                'guardianClassHistories.class.major',
-                'roleAssignments.major',
-                'asCoordinatorAssignments.major'
-            ])->findOrFail($id);
+            $teacher = Teacher::select('id', 'user_id', 'code', 'phone', 'avatar')
+                ->with([
+                    'user:id,name,email',
+                    'subjects:id,name,code',
+                    'guardianClassHistories:id,class_id,teacher_id,started_at,ended_at',
+                    'guardianClassHistories.class:id,full_name,major_id',
+                    'guardianClassHistories.class.major:id,name',
+                    'roleAssignments:id,teacher_id,major_id',
+                    'roleAssignments.major:id,name',
+                    'asCoordinatorAssignments:id,teacher_id,major_id',
+                    'asCoordinatorAssignments.major:id,name'
+                ])
+                ->findOrFail($id);
 
             return response()->json([
                 'id' => $teacher->id,

@@ -11,15 +11,19 @@ class ReportSeeder extends Seeder
 
     public function run(): void
     {
-        $room = Room::where('code', 'LAB01')->first();
+        $room = Room::where('code', 'GBR-LAB1')->first();
 
-        Report::create([
-            'room_id' => $room->id,
-            'date' => '2025-01-31',
-            'total_usage_hours' => 20,
-            'total_idle_hours' => 10,
-            'utilization_rate' => 66.7,
-            'generated_at' => now()
-        ]);
+        if ($room) {
+            Report::create([
+                'room_id' => $room->id,
+                'date' => '2025-01-31',
+                'total_usage_hours' => 20,
+                'total_idle_hours' => 10,
+                'utilization_rate' => 66.7,
+                'generated_at' => now()
+            ]);
+        }
+
+        $this->command->info("✅ ReportSeeder: Reports seeded successfully.");
     }
 }

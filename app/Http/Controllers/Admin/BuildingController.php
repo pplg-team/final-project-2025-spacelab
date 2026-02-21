@@ -29,7 +29,7 @@ class BuildingController extends Controller
             'user_id' => Auth::id(),
             'entity' => 'pengguna (' . Auth::user()->name . ')',
             'record_id' => Auth::id(),
-            'action' => 'create_building',
+            'action' => 'create',
             'new_data' => [
                 'message' => 'Pengguna ' . Auth::user()->name . ' membuat gedung baru pada ' . now()->toDateTimeString(),
                 'ip_address' => $request->ip(),
