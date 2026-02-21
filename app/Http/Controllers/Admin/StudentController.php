@@ -11,6 +11,7 @@ use App\Models\ClassHistory;
 use App\Models\Term;
 use App\Models\Role;
 use App\Models\Major;
+use App\Services\QueryOptimizationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -19,8 +20,12 @@ class StudentController extends Controller
 {
     public function index(Request $request)
     {
-        $majors = Major::orderBy('name')->get();
-        $classrooms = Classroom::with('major')->get()->sortBy('full_name');
+        $majors = Major::select('id', 'name', 'code')->orderBy('name')->paginate(50);
+        $classrooms = Classroom::select('id', 'major_id', 'level', 'rombel', 'full_name')
+            ->with('major:id,name,code')
+            ->orderBy('level')
+            ->orderBy('rombel')
+            ->paginate(50);
 
         return view('admin.student.index', [
             'title' => 'Siswa',
@@ -56,8 +61,8 @@ class StudentController extends Controller
         try {
             DB::beginTransaction();
 
-            // 1. Find or First active term
-            $activeTerm = Term::where('is_active', true)->first();
+            // Get active term with caching
+            $activeTerm = QueryOptimizationService::getActiveTerm();
             if (!$activeTerm) {
                 throw new \Exception('No active term found.');
             }
@@ -106,11 +111,12 @@ class StudentController extends Controller
     public function show($id)
     {
         try {
-            $activeTerm = Term::where('is_active', true)->first();
+            $activeTerm = QueryOptimizationService::getActiveTerm();
 
             $classHistory = ClassHistory::where('student_id', $id)
                 ->where('terms_id', $activeTerm->id)
-                ->with(['student.user', 'classroom.major', 'block'])
+                ->with(['student.user:id,name,email', 'classroom.major:id,name,code', 'block:id,name'])
+                ->select('id', 'student_id', 'class_id', 'terms_id', 'block_id')
                 ->first();
 
             if (!$classHistory || !$classHistory->student) {
@@ -192,7 +198,7 @@ class StudentController extends Controller
             ]);
 
             // Update class history if classroom changed
-            $activeTerm = Term::where('is_active', true)->first();
+            $activeTerm = QueryOptimizationService::getActiveTerm();
             $classHistory = ClassHistory::where('student_id', $student->id)
                 ->where('terms_id', $activeTerm->id)
                 ->first();

@@ -11,114 +11,167 @@ class RoomSeeder extends Seeder
     {
         $rooms = [];
 
-        /*
-        |--------------------------------------------------------------------------
-        | LABORATORIUM
-        |--------------------------------------------------------------------------
-        */
-        $labRooms = [
-            ['code' => 'LAB01', 'name' => 'Laboratorium Komputer 1', 'building_code' => 'GRPL', 'floor' => 1, 'capacity' => 40, 'type' => 'lab'],
-            ['code' => 'LAB02', 'name' => 'Laboratorium Komputer 2', 'building_code' => 'GTKJ', 'floor' => 1, 'capacity' => 40, 'type' => 'lab'],
-            ['code' => 'LAB03', 'name' => 'Laboratorium Komputer 3', 'building_code' => 'GDPIB', 'floor' => 1, 'capacity' => 40, 'type' => 'lab'],
-            ['code' => 'LAB04', 'name' => 'Laboratorium Jaringan', 'building_code' => 'GTKJ', 'floor' => 1, 'capacity' => 30, 'type' => 'lab'],
-            ['code' => 'LAB05', 'name' => 'Laboratorium Praktik Teknik', 'building_code' => 'GTEI', 'floor' => 2, 'capacity' => 35, 'type' => 'lab'],
-            ['code' => 'LAB06', 'name' => 'Laboratorium Desain Grafis', 'building_code' => 'GDPIB', 'floor' => 2, 'capacity' => 30, 'type' => 'lab'],
-            ['code' => 'LAB07', 'name' => 'Laboratorium Mesin 1', 'building_code' => 'GTFLM', 'floor' => 1, 'capacity' => 35, 'type' => 'lab'],
-            ['code' => 'LAB08', 'name' => 'Laboratorium Mesin 2', 'building_code' => 'GTFLM', 'floor' => 2, 'capacity' => 35, 'type' => 'lab'],
-            ['code' => 'LAB09', 'name' => 'Laboratorium Multimedia', 'building_code' => 'GBR', 'floor' => 3, 'capacity' => 30, 'type' => 'lab'],
-            ['code' => 'LAB10', 'name' => 'Laboratorium IPA', 'building_code' => 'GTMR', 'floor' => 1, 'capacity' => 35, 'type' => 'lab'],
-        ];
-
-        $rooms = array_merge($rooms, $labRooms);
+        $buildingMap = Building::pluck('id', 'code');
 
         /*
         |--------------------------------------------------------------------------
-        | KELAS REGULER
+        | GEDUNG BARU (GBR) - 3 LANTAI
+        | Aula, Ruang Pertemuan, Kurikulum, TU, BK, + kelas, kantor, lab
         |--------------------------------------------------------------------------
         */
-        $majors = ['RPL', 'TKJ', 'DKV', 'TSM', 'TKR', 'AKL', 'BDP', 'MP', 'KLN', 'PHT'];
-        $levels = [10, 11, 12];
 
-        $majorBuildingMap = [
-            'RPL' => 'GRPL',
-            'TKJ' => 'GTKJ',
-            'DKV' => 'GDPIB',
-            'TSM' => 'GTSM',
-            'TKR' => 'BTKR',
-            'AKL' => 'GTMR',
-            'BDP' => 'GTMR',
-            'MP'  => 'GTMR',
-            'KLN' => 'GTITL',
-            'PHT' => 'GTEI',
+        $rooms = array_merge($rooms, [
+
+            // Lantai 1
+            ['code' => 'GBR-KLS101', 'name' => 'Kelas 1 GBR', 'building_code' => 'GBR', 'floor' => 1, 'capacity' => 36, 'type' => 'kelas'],
+            ['code' => 'GBR-KLS102', 'name' => 'Kelas 2 GBR', 'building_code' => 'GBR', 'floor' => 1, 'capacity' => 36, 'type' => 'kelas'],
+            ['code' => 'GBR-TU', 'name' => 'Ruang Tata Usaha', 'building_code' => 'GBR', 'floor' => 1, 'capacity' => 15, 'type' => 'lainnya'],
+            ['code' => 'GBR-KURIK', 'name' => 'Ruang Kurikulum', 'building_code' => 'GBR', 'floor' => 1, 'capacity' => 10, 'type' => 'lainnya'],
+
+            // Lantai 2
+            ['code' => 'GBR-BK', 'name' => 'Ruang BK', 'building_code' => 'GBR', 'floor' => 2, 'capacity' => 8, 'type' => 'lainnya'],
+            ['code' => 'GBR-RPT', 'name' => 'Ruang Pertemuan', 'building_code' => 'GBR', 'floor' => 2, 'capacity' => 40, 'type' => 'lainnya'],
+            ['code' => 'GBR-LAB1', 'name' => 'Laboratorium Multimedia', 'building_code' => 'GBR', 'floor' => 2, 'capacity' => 30, 'type' => 'lab'],
+
+            // Lantai 3
+            ['code' => 'GBR-AULA', 'name' => 'Aula Serbaguna', 'building_code' => 'GBR', 'floor' => 3, 'capacity' => 300, 'type' => 'aula'],
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | GEDUNG BKK (BKK)
+        | Hanya Kantin, Aula, dan Ruang BKK
+        |--------------------------------------------------------------------------
+        */
+
+        $rooms = array_merge($rooms, [
+            ['code' => 'BKK-KANTIN', 'name' => 'Kantin Sekolah', 'building_code' => 'BKK', 'floor' => 1, 'capacity' => 120, 'type' => 'lainnya'],
+            ['code' => 'BKK-AULA', 'name' => 'Aula BKK', 'building_code' => 'BKK', 'floor' => 1, 'capacity' => 150, 'type' => 'aula'],
+            ['code' => 'BKK-UTAMA', 'name' => 'Ruang BKK', 'building_code' => 'BKK', 'floor' => 1, 'capacity' => 20, 'type' => 'lainnya'],
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | GEDUNG MASJID (MASJID) - 2 LANTAI, 1 RUANG PER LANTAI
+        |--------------------------------------------------------------------------
+        */
+
+        $rooms = array_merge($rooms, [
+            ['code' => 'MSJ-LT1', 'name' => 'Ruang Ibadah Lantai 1', 'building_code' => 'MASJID', 'floor' => 1, 'capacity' => 200, 'type' => 'lainnya'],
+            ['code' => 'MSJ-LT2', 'name' => 'Ruang Ibadah Lantai 2', 'building_code' => 'MASJID', 'floor' => 2, 'capacity' => 200, 'type' => 'lainnya'],
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | GEDUNG RPL
+        | Lantai 1 hanya kelas
+        | Lantai 2 ada 1 kelas + AWS + kantor + lab
+        |--------------------------------------------------------------------------
+        */
+
+        $rooms = array_merge($rooms, [
+
+            // Lantai 1
+            ['code' => 'RPL-KLS101', 'name' => 'Kelas RPL 1', 'building_code' => 'GRPL', 'floor' => 1, 'capacity' => 36, 'type' => 'kelas'],
+            ['code' => 'RPL-KLS102', 'name' => 'Kelas RPL 2', 'building_code' => 'GRPL', 'floor' => 1, 'capacity' => 36, 'type' => 'kelas'],
+            ['code' => 'RPL-KLS103', 'name' => 'Kelas RPL 3', 'building_code' => 'GRPL', 'floor' => 1, 'capacity' => 36, 'type' => 'kelas'],
+
+            // Lantai 2
+            ['code' => 'RPL-KLS201', 'name' => 'Kelas RPL 4', 'building_code' => 'GRPL', 'floor' => 2, 'capacity' => 36, 'type' => 'kelas'],
+            ['code' => 'RPL-AWS', 'name' => 'Ruang AWS Cloud Lab', 'building_code' => 'GRPL', 'floor' => 2, 'capacity' => 30, 'type' => 'lab'],
+            ['code' => 'RPL-LAB1', 'name' => 'Laboratorium Pemrograman', 'building_code' => 'GRPL', 'floor' => 2, 'capacity' => 35, 'type' => 'lab'],
+            ['code' => 'RPL-KANTOR', 'name' => 'Kantor RPL', 'building_code' => 'GRPL', 'floor' => 2, 'capacity' => 8, 'type' => 'lainnya'],
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | GEDUNG TKJ (1 LANTAI SAJA)
+        |--------------------------------------------------------------------------
+        */
+
+        for ($i = 1; $i <= 6; $i++) {
+            $rooms[] = [
+                'code' => "TKJ-KLS10{$i}",
+                'name' => "Kelas TKJ {$i}",
+                'building_code' => 'GTKJ',
+                'floor' => 1,
+                'capacity' => 36,
+                'type' => 'kelas',
+            ];
+        }
+
+        $rooms[] = [
+            'code' => 'TKJ-LAB1',
+            'name' => 'Laboratorium Jaringan',
+            'building_code' => 'GTKJ',
+            'floor' => 1,
+            'capacity' => 30,
+            'type' => 'lab',
         ];
 
-        foreach ($majors as $major) {
-            foreach ($levels as $level) {
-                for ($rombel = 1; $rombel <= 3; $rombel++) {
+        /*
+        |--------------------------------------------------------------------------
+        | GEDUNG LAIN (2 LANTAI)
+        | Pastikan tiap gedung punya kelas, kantor, dan lab
+        |--------------------------------------------------------------------------
+        */
 
-                    $buildingCode = $majorBuildingMap[$major] ?? 'GBR';
-                    $floor = ($rombel % 2) + 1;
+        $twoFloorBuildings = ['GDPIB', 'GTSM', 'GTMR', 'GTITL', 'GTFLM', 'GTEI', 'BTKR'];
 
-                    $rooms[] = [
-                        'code' => "KLS_{$major}{$level}{$rombel}",
-                        'name' => "Kelas {$level} {$major} {$rombel}",
-                        'building_code' => $buildingCode,
-                        'floor' => $floor,
-                        'capacity' => 36,
-                        'type' => 'kelas',
-                    ];
-                }
+        foreach ($twoFloorBuildings as $code) {
+
+            // Lantai 1 - kelas
+            for ($i = 1; $i <= 3; $i++) {
+                $rooms[] = [
+                    'code' => "{$code}-KLS1{$i}",
+                    'name' => "Kelas {$code} {$i}",
+                    'building_code' => $code,
+                    'floor' => 1,
+                    'capacity' => 36,
+                    'type' => 'kelas',
+                ];
             }
+
+            // Lantai 2 - lab + kantor
+            $rooms[] = [
+                'code' => "{$code}-LAB1",
+                'name' => "Laboratorium {$code}",
+                'building_code' => $code,
+                'floor' => 2,
+                'capacity' => 30,
+                'type' => 'lab',
+            ];
+
+            $rooms[] = [
+                'code' => "{$code}-KANTOR",
+                'name' => "Kantor {$code}",
+                'building_code' => $code,
+                'floor' => 2,
+                'capacity' => 10,
+                'type' => 'lainnya',
+            ];
         }
 
         /*
         |--------------------------------------------------------------------------
-        | RUANG KANTOR
+        | RUANG LUAR (Tetap punya building_id)
         |--------------------------------------------------------------------------
         */
-        $officeRooms = [
-            ['code' => 'RGURU01', 'name' => 'Ruang Guru', 'building_code' => 'GBR', 'floor' => 1, 'capacity' => 50, 'type' => 'kantor'],
-            ['code' => 'RGURU02', 'name' => 'Ruang Guru Khusus', 'building_code' => 'GBR', 'floor' => 2, 'capacity' => 30, 'type' => 'kantor'],
-            ['code' => 'RKEPSEK', 'name' => 'Ruang Kepala Sekolah', 'building_code' => 'GBR', 'floor' => 3, 'capacity' => 8, 'type' => 'kantor'],
-            ['code' => 'RWAKIL', 'name' => 'Ruang Wakil Kepala Sekolah', 'building_code' => 'GBR', 'floor' => 3, 'capacity' => 6, 'type' => 'kantor'],
-            ['code' => 'RTU01', 'name' => 'Ruang Tata Usaha', 'building_code' => 'GBR', 'floor' => 1, 'capacity' => 15, 'type' => 'kantor'],
-            ['code' => 'RKURIKULUM', 'name' => 'Ruang Kurikulum', 'building_code' => 'GBR', 'floor' => 1, 'capacity' => 10, 'type' => 'kantor'],
-        ];
 
-        $rooms = array_merge($rooms, $officeRooms);
+        $rooms[] = [
+            'code' => 'GTMR-LAP',
+            'name' => 'Lapangan Olahraga',
+            'building_code' => 'GTMR',
+            'floor' => 1,
+            'capacity' => 500,
+            'type' => 'lainnya',
+        ];
 
         /*
         |--------------------------------------------------------------------------
-        | FASILITAS UMUM
+        | PERSIST
         |--------------------------------------------------------------------------
         */
-        $facilityRooms = [
-            ['code' => 'RPERPUS', 'name' => 'Perpustakaan Sekolah', 'building_code' => 'GTMR', 'floor' => 1, 'capacity' => 50, 'type' => 'fasilitas'],
-            ['code' => 'RUKS', 'name' => 'Ruang UKS', 'building_code' => 'GTMR', 'floor' => 1, 'capacity' => 8, 'type' => 'fasilitas'],
-            ['code' => 'RMUSHOLLA', 'name' => 'Musholla', 'building_code' => 'GTMR', 'floor' => 1, 'capacity' => 100, 'type' => 'fasilitas'],
-            ['code' => 'RKANTIN', 'name' => 'Kantin Sekolah', 'building_code' => 'GTMR', 'floor' => 1, 'capacity' => 80, 'type' => 'fasilitas'],
-            ['code' => 'RSERBAGUNA', 'name' => 'Aula Serbaguna', 'building_code' => 'GBR', 'floor' => 3, 'capacity' => 300, 'type' => 'fasilitas'],
-            ['code' => 'RGUDANG', 'name' => 'Gudang Sekolah', 'building_code' => 'GTFLM', 'floor' => 1, 'capacity' => 5, 'type' => 'penyimpanan'],
-            ['code' => 'RTERBUKA', 'name' => 'Lapangan Olahraga', 'building_code' => 'GTMR', 'floor' => 1, 'capacity' => 200, 'type' => 'fasilitas'],
-        ];
-
-        $rooms = array_merge($rooms, $facilityRooms);
-
-        /*
-        |--------------------------------------------------------------------------
-        | PERSIST DATA
-        |--------------------------------------------------------------------------
-        */
-
-        $buildingMap = Building::pluck('id', 'code');
-
-        $typeMap = [
-            'lab' => 'lab',
-            'kelas' => 'kelas',
-            'kantor' => 'lainnya',
-            'fasilitas' => 'lainnya',
-            'penyimpanan' => 'lainnya',
-        ];
 
         foreach ($rooms as $room) {
 
@@ -127,9 +180,9 @@ class RoomSeeder extends Seeder
                 [
                     'name' => $room['name'],
                     'building_id' => $buildingMap[$room['building_code']] ?? null,
-                    'floor' => $room['floor'] ?? null,
-                    'capacity' => $room['capacity'] ?? null,
-                    'type' => $typeMap[$room['type']] ?? 'lainnya',
+                    'floor' => $room['floor'],
+                    'capacity' => $room['capacity'],
+                    'type' => $room['type'],
                     'is_active' => true,
                     'notes' => null,
                 ]
